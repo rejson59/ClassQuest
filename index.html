@@ -10,13 +10,11 @@
   
   <style>
     :root {
-      /* Dokładny chłodny odcień jasnego szarego ze wzoru */
       --bg: #e6ecf5;
       --text-main: #2d3748;
       --text-muted: #718096;
       --accent: #2563eb;
 
-      /* Precyzyjnie dobrane światło i cień pod kątem 135deg */
       --shadow-dark: rgba(166, 180, 200, 0.7);
       --shadow-light: #ffffff;
     }
@@ -35,9 +33,10 @@
       align-items: center;
       justify-content: center;
       padding: 20px;
+      overflow: hidden;
     }
 
-    /* Główna wypukła karta */
+    /* Karta główna - Krok 1 w sekwencji pojawiania się (Top-Left) */
     .neu-card {
       background: linear-gradient(145deg, #f0f6ff, #e0e7f1);
       border-radius: 36px;
@@ -46,10 +45,42 @@
       max-width: 420px;
       text-align: center;
       
-      /* Głębszy cień dla całej karty */
       box-shadow: 
         20px 20px 40px var(--shadow-dark),
         -20px -20px 40px var(--shadow-light);
+
+      opacity: 0;
+      transform: translate(-30px, -30px) scale(0.95);
+      animation: cardAppear 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes cardAppear {
+      to {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+      }
+    }
+
+    /* Animacja liter tekstowych */
+    .char {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(18px);
+      animation: letterJump 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes letterJump {
+      0% {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      60% {
+        transform: translateY(-6px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .logo {
@@ -80,7 +111,7 @@
       gap: 22px;
     }
 
-    /* Przycisk o wyraźnej wypukłości (dokładnie jak na Dribbble) */
+    /* Przycisk: Startuje krótki i rozwija się sprężysto do pełnego wymiaru */
     .neu-btn {
       display: flex;
       align-items: center;
@@ -89,7 +120,6 @@
       padding: 20px 26px;
       border-radius: 24px;
       
-      /* Gradient sprawia, że przycisk nie jest płaski! */
       background: linear-gradient(145deg, #ffffff, #dbe2ed);
       color: var(--text-main);
       text-decoration: none;
@@ -97,61 +127,108 @@
       font-size: 1.05rem;
       border: 1px solid rgba(255, 255, 255, 0.6);
       
-      /* Ostre, wyraziste cienie 3D */
       box-shadow: 
         7px 7px 14px var(--shadow-dark),
         -7px -7px 14px var(--shadow-light),
         inset 1px 1px 1px #ffffff;
 
-      transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+      opacity: 0;
+      transform: scaleX(0.45) translateY(20px);
+      transform-origin: center;
+      animation: btnExpand 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      
+      transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease, color 0.2s ease;
       cursor: pointer;
       user-select: none;
     }
 
-    .neu-btn:hover {
-      color: var(--accent);
-      /* Lekkie podniesienie i wyostrzenie cienia */
-      box-shadow: 
-        9px 9px 18px var(--shadow-dark),
-        -9px -9px 18px var(--shadow-light),
-        inset 1px 1px 2px #ffffff;
-      transform: translateY(-2px);
+    .neu-btn-1 {
+      animation-delay: 0.55s;
     }
 
-    /* Wciśnięcie do środka (Inverted Neumorphism) */
+    .neu-btn-2 {
+      animation-delay: 0.7s;
+    }
+
+    @keyframes btnExpand {
+      to {
+        opacity: 1;
+        transform: scaleX(1) translateY(0);
+      }
+    }
+
+    .neu-btn:hover {
+      color: var(--accent);
+      box-shadow: 
+        10px 10px 20px var(--shadow-dark),
+        -10px -10px 20px var(--shadow-light),
+        inset 1px 1px 2px #ffffff;
+      transform: scaleX(1) translateY(-3px);
+    }
+
+    /* Płynne zapadanie się z wypukłego w wklęsły (Inverted Neumorphism) */
     .neu-btn:active {
-      transform: translateY(1px);
+      transform: scaleX(1) translateY(1px);
       background: linear-gradient(145deg, #dbe2ed, #ffffff);
       box-shadow: 
-        inset 5px 5px 10px var(--shadow-dark),
-        inset -5px -5px 10px var(--shadow-light);
+        inset 6px 6px 12px var(--shadow-dark),
+        inset -6px -6px 12px var(--shadow-light);
     }
 
     .icon {
       font-size: 1.3rem;
+      display: inline-block;
+      transition: transform 0.2s ease;
+    }
+
+    .neu-btn:hover .icon {
+      transform: scale(1.2) rotate(6deg);
     }
   </style>
 </head>
 <body>
 
   <div class="neu-card">
-    <div class="logo">ClassQuest</div>
-    <p class="subtitle">Interaktywna platforma lekcyjna</p>
+    <div class="logo" id="logoText">ClassQuest</div>
+    <p class="subtitle" id="subtitleText">Interaktywna platforma lekcyjna</p>
     
-    <h2 class="title-question">Kim jesteś?</h2>
+    <h2 class="title-question" id="questionText">Kim jesteś?</h2>
 
     <div class="btn-group">
-      <a href="nauczyciel.html" class="neu-btn">
+      <a href="nauczyciel.html" class="neu-btn neu-btn-1">
         <span class="icon">🎓</span>
-        <span>Nauczyciel</span>
+        <span class="btn-text">Nauczyciel</span>
       </a>
 
-      <a href="uczen.html" class="neu-btn">
+      <a href="uczen.html" class="neu-btn neu-btn-2">
         <span class="icon">🎮</span>
-        <span>Uczeń</span>
+        <span class="btn-text">Uczeń</span>
       </a>
     </div>
   </div>
+
+  <script>
+    // Skrypt do dzielenia tekstu na poszczególne litery z opóźnieniem animacji (efekt fali)
+    function animateText(elementId, baseDelay) {
+      const el = document.getElementById(elementId);
+      const text = el.innerText;
+      el.innerHTML = '';
+      
+      [...text].forEach((char, index) => {
+        const span = document.createElement('span');
+        span.className = 'char';
+        span.innerHTML = char === ' ' ? '&nbsp;' : char;
+        // Obliczenie opóźnienia tak, by światło przechodziło z lewej do prawej
+        span.style.animationDelay = `${baseDelay + (index * 0.035)}s`;
+        el.appendChild(span);
+      });
+    }
+
+    // Sekwencja po przekątnej
+    animateText('logoText', 0.2);
+    animateText('subtitleText', 0.35);
+    animateText('questionText', 0.48);
+  </script>
 
 </body>
 </html>
