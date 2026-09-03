@@ -10,22 +10,26 @@
   
   <style>
     :root {
-      --bg: #e2e8f0;
+      --bg: #e5ebf1;
+      --card-bg: #e8eef5;
       --text-main: #1e293b;
       --text-muted: #64748b;
 
-      /* Głębszy, realistyczny Neumorfizm z fizycznym uniesieniem */
-      --shadow-lift: 
-        14px 14px 28px rgba(166, 175, 195, 0.75),
-        -14px -14px 28px rgba(255, 255, 255, 0.95);
-        
-      --shadow-hover: 
-        20px 20px 36px rgba(150, 160, 182, 0.85),
-        -20px -20px 36px rgba(255, 255, 255, 1);
+      /* Ostre, wyraziste cienie bez białej chmury */
+      --card-shadow: 
+        0px 20px 30px -10px rgba(100, 115, 135, 0.25),
+        0px 8px 12px -6px rgba(100, 115, 135, 0.15);
 
-      --shadow-pressed: 
-        inset 8px 8px 16px rgba(166, 175, 195, 0.8),
-        inset -8px -8px 16px rgba(255, 255, 255, 0.9);
+      --btn-shadow: 
+        0px 10px 15px -4px rgba(100, 115, 135, 0.2),
+        0px 4px 6px -2px rgba(100, 115, 135, 0.1);
+
+      --btn-shadow-hover: 
+        0px 18px 25px -5px rgba(100, 115, 135, 0.28),
+        0px 8px 10px -4px rgba(100, 115, 135, 0.15);
+
+      --btn-shadow-pressed: 
+        inset 0px 4px 8px rgba(100, 115, 135, 0.22);
     }
 
     * {
@@ -45,22 +49,19 @@
       padding: 20px;
     }
 
-    /* Karta z delikatnym matem i wyrazistą ramką */
-    .glass-card {
-      background: rgba(226, 232, 240, 0.75);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1.5px solid rgba(255, 255, 255, 0.8);
-      border-radius: 36px;
-      padding: 50px 40px;
+    .main-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 32px;
+      padding: 48px 36px;
       width: 100%;
-      max-width: 410px;
+      max-width: 400px;
       text-align: center;
-      box-shadow: var(--shadow-lift);
+      box-shadow: var(--card-shadow);
     }
 
     .logo {
-      font-size: 2.5rem;
+      font-size: 2.4rem;
       font-weight: 800;
       letter-spacing: -1.2px;
       margin-bottom: 6px;
@@ -69,66 +70,64 @@
 
     .subtitle {
       color: var(--text-muted);
-      font-size: 0.92rem;
+      font-size: 0.9rem;
       font-weight: 600;
-      margin-bottom: 40px;
+      margin-bottom: 36px;
     }
 
     .title-question {
-      font-size: 1.15rem;
+      font-size: 1.1rem;
       font-weight: 700;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
       color: var(--text-main);
     }
 
     .btn-group {
       display: flex;
       flex-direction: column;
-      gap: 22px;
+      gap: 18px;
     }
 
-    /* Fizyczne, unoszące się przyciski */
     .neu-btn {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 14px;
-      padding: 20px 28px;
-      border-radius: 24px;
-      background: var(--bg);
+      gap: 12px;
+      padding: 18px 24px;
+      border-radius: 20px;
+      background: #f0f4f9;
       color: var(--text-main);
       text-decoration: none;
       font-weight: 700;
-      font-size: 1.08rem;
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      box-shadow: var(--shadow-lift);
-      transition: all 0.22s cubic-bezier(0.25, 1, 0.5, 1);
+      font-size: 1.05rem;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: var(--btn-shadow);
+      transition: all 0.2s ease-in-out;
       cursor: pointer;
       user-select: none;
     }
 
-    /* Reakcja na światło i zawieszenie w powietrzu przy najechaniu */
     .neu-btn:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-hover);
-      border-color: rgba(255, 255, 255, 0.9);
+      transform: translateY(-3px);
+      box-shadow: var(--btn-shadow-hover);
+      background: #ffffff;
     }
 
-    /* Fizyczna wklęsłość po kliknięciu */
     .neu-btn:active {
-      transform: translateY(2px);
-      box-shadow: var(--shadow-pressed);
+      transform: translateY(1px);
+      box-shadow: var(--btn-shadow-pressed);
+      background: #e2e8f0;
       border-color: transparent;
     }
 
     .icon {
-      font-size: 1.35rem;
+      font-size: 1.3rem;
     }
   </style>
 </head>
 <body>
 
-  <div class="glass-card">
+  <div class="main-card">
     <div class="logo">ClassQuest</div>
     <p class="subtitle">Interaktywna platforma lekcyjna</p>
     
