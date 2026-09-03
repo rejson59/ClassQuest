@@ -1,1 +1,144 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClassQuest - Wybierz profil</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #1e1e24;
+      --shadow-dark: #151519;
+      --shadow-light: #27272f;
+      --accent-purple: #7b2cbf;
+      --accent-cyan: #00f5d4;
+      --text-main: #f8f9fa;
+      --text-muted: #a0aab2;
+    }
 
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: var(--bg);
+      padding: 40px 30px;
+      border-radius: 30px;
+      box-shadow: 12px 12px 24px var(--shadow-dark),
+                  -12px -12px 24px var(--shadow-light);
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .logo {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 35px;
+    }
+
+    .title-question {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 25px;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .neuro-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 18px 24px;
+      border-radius: 20px;
+      background: var(--bg);
+      color: var(--text-main);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.05rem;
+      border: none;
+      box-shadow: 6px 6px 14px var(--shadow-dark),
+                  -6px -6px 14px var(--shadow-light);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .neuro-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 8px 8px 18px var(--shadow-dark),
+                  -8px -8px 18px var(--shadow-light);
+    }
+
+    .neuro-btn:active {
+      transform: translateY(0);
+      box-shadow: inset 4px 4px 8px var(--shadow-dark),
+                  inset -4px -4px 8px var(--shadow-light);
+    }
+
+    .neuro-btn.teacher {
+      border-left: 4px solid var(--accent-purple);
+    }
+
+    .neuro-btn.student {
+      border-left: 4px solid var(--accent-cyan);
+    }
+
+    .icon {
+      font-size: 1.3rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="logo">ClassQuest</div>
+    <p class="subtitle">Interaktywna platforma lekcyjna</p>
+    
+    <h2 class="title-question">Kim jesteś?</h2>
+
+    <div class="btn-group">
+      <a href="nauczyciel.html" class="neuro-btn teacher">
+        <span class="icon">🎓</span>
+        <span>Nauczyciel</span>
+      </a>
+
+      <a href="uczen.html" class="neuro-btn student">
+        <span class="icon">🎮</span>
+        <span>Uczeń</span>
+      </a>
+    </div>
+  </div>
+
+</body>
+</html>
