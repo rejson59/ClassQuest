@@ -6,19 +6,19 @@
   <title>ClassQuest - Wybierz profil</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
   
   <style>
     :root {
-      --bg: #e2e8f0;
-      --card-glass: rgba(235, 240, 248, 0.7);
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      
-      /* Kolory przycisków i czarny krawędziak */
-      --btn-bg: #ffffff;
-      --btn-stroke: #0f172a;
-      --shadow-drop: rgba(15, 23, 42, 0.25);
+      /* Dokładny chłodny odcień jasnego szarego ze wzoru */
+      --bg: #e6ecf5;
+      --text-main: #2d3748;
+      --text-muted: #718096;
+      --accent: #2563eb;
+
+      /* Precyzyjnie dobrane światło i cień pod kątem 135deg */
+      --shadow-dark: rgba(166, 180, 200, 0.7);
+      --shadow-light: #ffffff;
     }
 
     * {
@@ -29,8 +29,7 @@
     }
 
     body {
-      background: radial-gradient(circle at 50% 30%, #f1f5f9 0%, #cbd5e1 100%);
-      color: var(--text-main);
+      background-color: var(--bg);
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -38,40 +37,39 @@
       padding: 20px;
     }
 
-    /* Glassmorphism + Neumorfizm na karcie */
-    .glass-card {
-      background: var(--card-glass);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 2px solid rgba(255, 255, 255, 0.9);
+    /* Główna wypukła karta */
+    .neu-card {
+      background: linear-gradient(145deg, #f0f6ff, #e0e7f1);
       border-radius: 36px;
-      padding: 50px 38px;
+      padding: 52px 42px;
       width: 100%;
-      max-width: 410px;
+      max-width: 420px;
       text-align: center;
+      
+      /* Głębszy cień dla całej karty */
       box-shadow: 
-        16px 16px 32px rgba(148, 163, 184, 0.5),
-        -16px -16px 32px rgba(255, 255, 255, 0.9);
+        20px 20px 40px var(--shadow-dark),
+        -20px -20px 40px var(--shadow-light);
     }
 
     .logo {
       font-size: 2.5rem;
       font-weight: 800;
-      letter-spacing: -1.2px;
+      letter-spacing: -1px;
       margin-bottom: 6px;
       color: var(--text-main);
     }
 
     .subtitle {
       color: var(--text-muted);
-      font-size: 0.92rem;
-      font-weight: 700;
+      font-size: 0.9rem;
+      font-weight: 600;
       margin-bottom: 40px;
     }
 
     .title-question {
-      font-size: 1.15rem;
-      font-weight: 800;
+      font-size: 1.1rem;
+      font-weight: 700;
       margin-bottom: 28px;
       color: var(--text-main);
     }
@@ -82,68 +80,73 @@
       gap: 22px;
     }
 
-    /* Przycisk z głębokim czarnym rantem 3D */
-    .btn-3d {
+    /* Przycisk o wyraźnej wypukłości (dokładnie jak na Dribbble) */
+    .neu-btn {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 14px;
-      padding: 18px 28px;
-      border-radius: 20px;
-      background: var(--btn-bg);
+      gap: 12px;
+      padding: 20px 26px;
+      border-radius: 24px;
+      
+      /* Gradient sprawia, że przycisk nie jest płaski! */
+      background: linear-gradient(145deg, #ffffff, #dbe2ed);
       color: var(--text-main);
       text-decoration: none;
-      font-weight: 800;
-      font-size: 1.1rem;
-      border: 2.5px solid var(--btn-stroke);
+      font-weight: 700;
+      font-size: 1.05rem;
+      border: 1px solid rgba(255, 255, 255, 0.6);
       
-      /* Czarny bok przycisku (6px) + delikatny miękki cień poniżej */
+      /* Ostre, wyraziste cienie 3D */
       box-shadow: 
-        0px 6px 0px 0px var(--btn-stroke),
-        0px 12px 18px 0px var(--shadow-drop);
+        7px 7px 14px var(--shadow-dark),
+        -7px -7px 14px var(--shadow-light),
+        inset 1px 1px 1px #ffffff;
 
-      transform: translateY(-2px);
-      transition: all 0.1s ease;
+      transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
       cursor: pointer;
       user-select: none;
     }
 
-    .btn-3d:hover {
-      background: #ffffff;
-      transform: translateY(-4px);
+    .neu-btn:hover {
+      color: var(--accent);
+      /* Lekkie podniesienie i wyostrzenie cienia */
       box-shadow: 
-        0px 8px 0px 0px var(--btn-stroke),
-        0px 16px 22px 0px var(--shadow-drop);
+        9px 9px 18px var(--shadow-dark),
+        -9px -9px 18px var(--shadow-light),
+        inset 1px 1px 2px #ffffff;
+      transform: translateY(-2px);
     }
 
-    /* Fizyczne zapadanie przy kliknięciu */
-    .btn-3d:active {
-      transform: translateY(4px);
+    /* Wciśnięcie do środka (Inverted Neumorphism) */
+    .neu-btn:active {
+      transform: translateY(1px);
+      background: linear-gradient(145deg, #dbe2ed, #ffffff);
       box-shadow: 
-        0px 0px 0px 0px var(--btn-stroke),
-        0px 2px 6px 0px var(--shadow-drop);
+        inset 5px 5px 10px var(--shadow-dark),
+        inset -5px -5px 10px var(--shadow-light);
     }
 
     .icon {
-      font-size: 1.35rem;
+      font-size: 1.3rem;
     }
   </style>
 </head>
 <body>
 
-  <div class="glass-card">
+  <div class="neu-card">
     <div class="logo">ClassQuest</div>
     <p class="subtitle">Interaktywna platforma lekcyjna</p>
     
     <h2 class="title-question">Kim jesteś?</h2>
 
     <div class="btn-group">
-      <a href="nauczyciel.html" class="btn-3d">
+      <a href="nauczyciel.html" class="neu-btn">
         <span class="icon">🎓</span>
         <span>Nauczyciel</span>
       </a>
 
-      <a href="uczen.html" class="btn-3d">
+      <a href="uczen.html" class="neu-btn">
         <span class="icon">🎮</span>
         <span>Uczeń</span>
       </a>
