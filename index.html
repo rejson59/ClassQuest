@@ -6,17 +6,20 @@
   <title>ClassQuest - Wybierz profil</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
   
   <style>
     :root {
-      --bg: #1e1e24;
-      --shadow-dark: #151519;
-      --shadow-light: #27272f;
-      --accent-purple: #7b2cbf;
-      --accent-cyan: #00f5d4;
-      --text-main: #f8f9fa;
-      --text-muted: #a0aab2;
+      --bg: #e0e5ec;
+      --text-dark: #2d3748;
+      --text-muted: #718096;
+      /* Neumorphism Shadows */
+      --shadow-flat: 9px 9px 16px #a3b1c6, -9px -9px 16px #ffffff;
+      --shadow-hover: 12px 12px 20px #a3b1c6, -12px -12px 20px #ffffff;
+      --shadow-pressed: inset 6px 6px 10px #a3b1c6, inset -6px -6px 10px #ffffff;
+      /* Accents */
+      --purple: #6c5ce7;
+      --cyan: #00cec9;
     }
 
     * {
@@ -28,7 +31,7 @@
 
     body {
       background-color: var(--bg);
-      color: var(--text-main);
+      color: var(--text-dark);
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -36,37 +39,40 @@
       padding: 20px;
     }
 
-    .container {
-      background: var(--bg);
-      padding: 40px 30px;
-      border-radius: 30px;
-      box-shadow: 12px 12px 24px var(--shadow-dark),
-                  -12px -12px 24px var(--shadow-light);
-      max-width: 420px;
+    /* Szklana karta z Neumorficznym cieniem */
+    .glass-card {
+      background: rgba(224, 229, 236, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 32px;
+      padding: 45px 35px;
       width: 100%;
+      max-width: 400px;
       text-align: center;
+      box-shadow: var(--shadow-flat);
     }
 
     .logo {
-      font-size: 2.2rem;
+      font-size: 2.4rem;
       font-weight: 800;
       letter-spacing: -1px;
-      margin-bottom: 8px;
-      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+      color: var(--text-dark);
     }
 
     .subtitle {
       color: var(--text-muted);
-      font-size: 0.95rem;
+      font-size: 0.9rem;
+      font-weight: 500;
       margin-bottom: 35px;
     }
 
     .title-question {
-      font-size: 1.25rem;
-      font-weight: 600;
+      font-size: 1.15rem;
+      font-weight: 700;
       margin-bottom: 25px;
+      color: var(--text-dark);
     }
 
     .btn-group {
@@ -75,7 +81,8 @@
       gap: 20px;
     }
 
-    .neuro-btn {
+    /* Realistyczne, wypukłe przyciski Neumorficzne */
+    .neu-btn {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -83,35 +90,34 @@
       padding: 18px 24px;
       border-radius: 20px;
       background: var(--bg);
-      color: var(--text-main);
+      color: var(--text-dark);
       text-decoration: none;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 1.05rem;
       border: none;
-      box-shadow: 6px 6px 14px var(--shadow-dark),
-                  -6px -6px 14px var(--shadow-light);
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-flat);
+      transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
       cursor: pointer;
+      user-select: none;
     }
 
-    .neuro-btn:hover {
+    .neu-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 8px 8px 18px var(--shadow-dark),
-                  -8px -8px 18px var(--shadow-light);
+      box-shadow: var(--shadow-hover);
     }
 
-    .neuro-btn:active {
-      transform: translateY(0);
-      box-shadow: inset 4px 4px 8px var(--shadow-dark),
-                  inset -4px -4px 8px var(--shadow-light);
+    /* Efekt wciskania fizycznego przycisku */
+    .neu-btn:active {
+      transform: translateY(1px);
+      box-shadow: var(--shadow-pressed);
     }
 
-    .neuro-btn.teacher {
-      border-left: 4px solid var(--accent-purple);
+    .neu-btn.teacher {
+      border-bottom: 3px solid var(--purple);
     }
 
-    .neuro-btn.student {
-      border-left: 4px solid var(--accent-cyan);
+    .neu-btn.student {
+      border-bottom: 3px solid var(--cyan);
     }
 
     .icon {
@@ -121,19 +127,19 @@
 </head>
 <body>
 
-  <div class="container">
+  <div class="glass-card">
     <div class="logo">ClassQuest</div>
     <p class="subtitle">Interaktywna platforma lekcyjna</p>
     
     <h2 class="title-question">Kim jesteś?</h2>
 
     <div class="btn-group">
-      <a href="nauczyciel.html" class="neuro-btn teacher">
+      <a href="nauczyciel.html" class="neu-btn teacher">
         <span class="icon">🎓</span>
         <span>Nauczyciel</span>
       </a>
 
-      <a href="uczen.html" class="neuro-btn student">
+      <a href="uczen.html" class="neu-btn student">
         <span class="icon">🎮</span>
         <span>Uczeń</span>
       </a>
