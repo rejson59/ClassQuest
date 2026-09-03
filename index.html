@@ -11,14 +11,14 @@
   <style>
     :root {
       --bg: #e2e8f0;
-      --card-bg: #edf2f7;
+      --card-glass: rgba(235, 240, 248, 0.7);
       --text-main: #0f172a;
       --text-muted: #64748b;
       
-      /* Kolory przycisków */
-      --btn-face: #ffffff;
-      --btn-side: #cbd5e1;
-      --btn-dark-shadow: rgba(15, 23, 42, 0.25);
+      /* Kolory przycisków i czarny krawędziak */
+      --btn-bg: #ffffff;
+      --btn-stroke: #0f172a;
+      --shadow-drop: rgba(15, 23, 42, 0.25);
     }
 
     * {
@@ -29,7 +29,7 @@
     }
 
     body {
-      background-color: var(--bg);
+      background: radial-gradient(circle at 50% 30%, #f1f5f9 0%, #cbd5e1 100%);
       color: var(--text-main);
       min-height: 100vh;
       display: flex;
@@ -38,18 +38,20 @@
       padding: 20px;
     }
 
-    /* Główna karta z mocnym, wyrazistym cieniem */
-    .main-card {
-      background: var(--card-bg);
+    /* Glassmorphism + Neumorfizm na karcie */
+    .glass-card {
+      background: var(--card-glass);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 2px solid rgba(255, 255, 255, 0.9);
       border-radius: 36px;
       padding: 50px 38px;
       width: 100%;
       max-width: 410px;
       text-align: center;
       box-shadow: 
-        0px 20px 35px -5px rgba(15, 23, 42, 0.2),
-        0px 10px 15px -5px rgba(15, 23, 42, 0.1);
-      border: 2px solid #ffffff;
+        16px 16px 32px rgba(148, 163, 184, 0.5),
+        -16px -16px 32px rgba(255, 255, 255, 0.9);
     }
 
     .logo {
@@ -80,50 +82,46 @@
       gap: 22px;
     }
 
-    /* Prawdziwy przycisk 3D (Klocek) */
+    /* Przycisk z głębokim czarnym rantem 3D */
     .btn-3d {
-      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 14px;
-      padding: 20px 28px;
-      border-radius: 22px;
-      background: var(--btn-face);
+      padding: 18px 28px;
+      border-radius: 20px;
+      background: var(--btn-bg);
       color: var(--text-main);
       text-decoration: none;
       font-weight: 800;
       font-size: 1.1rem;
-      border: 2px solid #94a3b8;
+      border: 2.5px solid var(--btn-stroke);
       
-      /* Górny rant jasny, dolny gruba krawędź 3D + mocny ciemny cień pod klockiem */
+      /* Czarny bok przycisku (6px) + delikatny miękki cień poniżej */
       box-shadow: 
-        0px 8px 0px 0px #94a3b8,
-        0px 16px 20px 0px var(--btn-dark-shadow);
+        0px 6px 0px 0px var(--btn-stroke),
+        0px 12px 18px 0px var(--shadow-drop);
 
-      /* Przesunięcie w górę, żeby zrobić miejsce na "grubość" klocka */
-      transform: translateY(-4px);
-      transition: all 0.12s ease;
+      transform: translateY(-2px);
+      transition: all 0.1s ease;
       cursor: pointer;
       user-select: none;
     }
 
     .btn-3d:hover {
       background: #ffffff;
-      border-color: #64748b;
-      /* Podbicie grubości na hover */
+      transform: translateY(-4px);
       box-shadow: 
-        0px 10px 0px 0px #64748b,
-        0px 20px 25px 0px rgba(15, 23, 42, 0.3);
-      transform: translateY(-6px);
+        0px 8px 0px 0px var(--btn-stroke),
+        0px 16px 22px 0px var(--shadow-drop);
     }
 
-    /* Fizyczne wciśnięcie klocka po kliknięciu */
+    /* Fizyczne zapadanie przy kliknięciu */
     .btn-3d:active {
       transform: translateY(4px);
       box-shadow: 
-        0px 0px 0px 0px #64748b,
-        0px 4px 8px 0px rgba(15, 23, 42, 0.25);
+        0px 0px 0px 0px var(--btn-stroke),
+        0px 2px 6px 0px var(--shadow-drop);
     }
 
     .icon {
@@ -133,7 +131,7 @@
 </head>
 <body>
 
-  <div class="main-card">
+  <div class="glass-card">
     <div class="logo">ClassQuest</div>
     <p class="subtitle">Interaktywna platforma lekcyjna</p>
     
