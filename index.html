@@ -6,30 +6,19 @@
   <title>ClassQuest - Wybierz profil</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
   
   <style>
     :root {
-      --bg: #e5ebf1;
-      --card-bg: #e8eef5;
-      --text-main: #1e293b;
+      --bg: #e2e8f0;
+      --card-bg: #edf2f7;
+      --text-main: #0f172a;
       --text-muted: #64748b;
-
-      /* Ostre, wyraziste cienie bez białej chmury */
-      --card-shadow: 
-        0px 20px 30px -10px rgba(100, 115, 135, 0.25),
-        0px 8px 12px -6px rgba(100, 115, 135, 0.15);
-
-      --btn-shadow: 
-        0px 10px 15px -4px rgba(100, 115, 135, 0.2),
-        0px 4px 6px -2px rgba(100, 115, 135, 0.1);
-
-      --btn-shadow-hover: 
-        0px 18px 25px -5px rgba(100, 115, 135, 0.28),
-        0px 8px 10px -4px rgba(100, 115, 135, 0.15);
-
-      --btn-shadow-pressed: 
-        inset 0px 4px 8px rgba(100, 115, 135, 0.22);
+      
+      /* Kolory przycisków */
+      --btn-face: #ffffff;
+      --btn-side: #cbd5e1;
+      --btn-dark-shadow: rgba(15, 23, 42, 0.25);
     }
 
     * {
@@ -49,19 +38,22 @@
       padding: 20px;
     }
 
+    /* Główna karta z mocnym, wyrazistym cieniem */
     .main-card {
       background: var(--card-bg);
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      border-radius: 32px;
-      padding: 48px 36px;
+      border-radius: 36px;
+      padding: 50px 38px;
       width: 100%;
-      max-width: 400px;
+      max-width: 410px;
       text-align: center;
-      box-shadow: var(--card-shadow);
+      box-shadow: 
+        0px 20px 35px -5px rgba(15, 23, 42, 0.2),
+        0px 10px 15px -5px rgba(15, 23, 42, 0.1);
+      border: 2px solid #ffffff;
     }
 
     .logo {
-      font-size: 2.4rem;
+      font-size: 2.5rem;
       font-weight: 800;
       letter-spacing: -1.2px;
       margin-bottom: 6px;
@@ -70,58 +62,72 @@
 
     .subtitle {
       color: var(--text-muted);
-      font-size: 0.9rem;
-      font-weight: 600;
-      margin-bottom: 36px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      margin-bottom: 40px;
     }
 
     .title-question {
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 24px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      margin-bottom: 28px;
       color: var(--text-main);
     }
 
     .btn-group {
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 22px;
     }
 
-    .neu-btn {
+    /* Prawdziwy przycisk 3D (Klocek) */
+    .btn-3d {
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
-      padding: 18px 24px;
-      border-radius: 20px;
-      background: #f0f4f9;
+      gap: 14px;
+      padding: 20px 28px;
+      border-radius: 22px;
+      background: var(--btn-face);
       color: var(--text-main);
       text-decoration: none;
-      font-weight: 700;
-      font-size: 1.05rem;
-      border: 1px solid rgba(255, 255, 255, 0.9);
-      box-shadow: var(--btn-shadow);
-      transition: all 0.2s ease-in-out;
+      font-weight: 800;
+      font-size: 1.1rem;
+      border: 2px solid #94a3b8;
+      
+      /* Górny rant jasny, dolny gruba krawędź 3D + mocny ciemny cień pod klockiem */
+      box-shadow: 
+        0px 8px 0px 0px #94a3b8,
+        0px 16px 20px 0px var(--btn-dark-shadow);
+
+      /* Przesunięcie w górę, żeby zrobić miejsce na "grubość" klocka */
+      transform: translateY(-4px);
+      transition: all 0.12s ease;
       cursor: pointer;
       user-select: none;
     }
 
-    .neu-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--btn-shadow-hover);
+    .btn-3d:hover {
       background: #ffffff;
+      border-color: #64748b;
+      /* Podbicie grubości na hover */
+      box-shadow: 
+        0px 10px 0px 0px #64748b,
+        0px 20px 25px 0px rgba(15, 23, 42, 0.3);
+      transform: translateY(-6px);
     }
 
-    .neu-btn:active {
-      transform: translateY(1px);
-      box-shadow: var(--btn-shadow-pressed);
-      background: #e2e8f0;
-      border-color: transparent;
+    /* Fizyczne wciśnięcie klocka po kliknięciu */
+    .btn-3d:active {
+      transform: translateY(4px);
+      box-shadow: 
+        0px 0px 0px 0px #64748b,
+        0px 4px 8px 0px rgba(15, 23, 42, 0.25);
     }
 
     .icon {
-      font-size: 1.3rem;
+      font-size: 1.35rem;
     }
   </style>
 </head>
@@ -134,12 +140,12 @@
     <h2 class="title-question">Kim jesteś?</h2>
 
     <div class="btn-group">
-      <a href="nauczyciel.html" class="neu-btn">
+      <a href="nauczyciel.html" class="btn-3d">
         <span class="icon">🎓</span>
         <span>Nauczyciel</span>
       </a>
 
-      <a href="uczen.html" class="neu-btn">
+      <a href="uczen.html" class="btn-3d">
         <span class="icon">🎮</span>
         <span>Uczeń</span>
       </a>
