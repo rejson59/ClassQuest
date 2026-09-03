@@ -6,20 +6,26 @@
   <title>ClassQuest - Wybierz profil</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
   
   <style>
     :root {
-      --bg: #e0e5ec;
-      --text-dark: #2d3748;
-      --text-muted: #718096;
-      /* Neumorphism Shadows */
-      --shadow-flat: 9px 9px 16px #a3b1c6, -9px -9px 16px #ffffff;
-      --shadow-hover: 12px 12px 20px #a3b1c6, -12px -12px 20px #ffffff;
-      --shadow-pressed: inset 6px 6px 10px #a3b1c6, inset -6px -6px 10px #ffffff;
-      /* Accents */
-      --purple: #6c5ce7;
-      --cyan: #00cec9;
+      --bg: #e2e8f0;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+
+      /* Głębszy, realistyczny Neumorfizm z fizycznym uniesieniem */
+      --shadow-lift: 
+        14px 14px 28px rgba(166, 175, 195, 0.75),
+        -14px -14px 28px rgba(255, 255, 255, 0.95);
+        
+      --shadow-hover: 
+        20px 20px 36px rgba(150, 160, 182, 0.85),
+        -20px -20px 36px rgba(255, 255, 255, 1);
+
+      --shadow-pressed: 
+        inset 8px 8px 16px rgba(166, 175, 195, 0.8),
+        inset -8px -8px 16px rgba(255, 255, 255, 0.9);
     }
 
     * {
@@ -31,7 +37,7 @@
 
     body {
       background-color: var(--bg);
-      color: var(--text-dark);
+      color: var(--text-main);
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -39,89 +45,84 @@
       padding: 20px;
     }
 
-    /* Szklana karta z Neumorficznym cieniem */
+    /* Karta z delikatnym matem i wyrazistą ramką */
     .glass-card {
-      background: rgba(224, 229, 236, 0.65);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      border-radius: 32px;
-      padding: 45px 35px;
+      background: rgba(226, 232, 240, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1.5px solid rgba(255, 255, 255, 0.8);
+      border-radius: 36px;
+      padding: 50px 40px;
       width: 100%;
-      max-width: 400px;
+      max-width: 410px;
       text-align: center;
-      box-shadow: var(--shadow-flat);
+      box-shadow: var(--shadow-lift);
     }
 
     .logo {
-      font-size: 2.4rem;
+      font-size: 2.5rem;
       font-weight: 800;
-      letter-spacing: -1px;
+      letter-spacing: -1.2px;
       margin-bottom: 6px;
-      color: var(--text-dark);
+      color: var(--text-main);
     }
 
     .subtitle {
       color: var(--text-muted);
-      font-size: 0.9rem;
-      font-weight: 500;
-      margin-bottom: 35px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      margin-bottom: 40px;
     }
 
     .title-question {
       font-size: 1.15rem;
       font-weight: 700;
-      margin-bottom: 25px;
-      color: var(--text-dark);
+      margin-bottom: 28px;
+      color: var(--text-main);
     }
 
     .btn-group {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 22px;
     }
 
-    /* Realistyczne, wypukłe przyciski Neumorficzne */
+    /* Fizyczne, unoszące się przyciski */
     .neu-btn {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
-      padding: 18px 24px;
-      border-radius: 20px;
+      gap: 14px;
+      padding: 20px 28px;
+      border-radius: 24px;
       background: var(--bg);
-      color: var(--text-dark);
+      color: var(--text-main);
       text-decoration: none;
       font-weight: 700;
-      font-size: 1.05rem;
-      border: none;
-      box-shadow: var(--shadow-flat);
-      transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+      font-size: 1.08rem;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: var(--shadow-lift);
+      transition: all 0.22s cubic-bezier(0.25, 1, 0.5, 1);
       cursor: pointer;
       user-select: none;
     }
 
+    /* Reakcja na światło i zawieszenie w powietrzu przy najechaniu */
     .neu-btn:hover {
-      transform: translateY(-2px);
+      transform: translateY(-4px);
       box-shadow: var(--shadow-hover);
+      border-color: rgba(255, 255, 255, 0.9);
     }
 
-    /* Efekt wciskania fizycznego przycisku */
+    /* Fizyczna wklęsłość po kliknięciu */
     .neu-btn:active {
-      transform: translateY(1px);
+      transform: translateY(2px);
       box-shadow: var(--shadow-pressed);
-    }
-
-    .neu-btn.teacher {
-      border-bottom: 3px solid var(--purple);
-    }
-
-    .neu-btn.student {
-      border-bottom: 3px solid var(--cyan);
+      border-color: transparent;
     }
 
     .icon {
-      font-size: 1.3rem;
+      font-size: 1.35rem;
     }
   </style>
 </head>
@@ -134,12 +135,12 @@
     <h2 class="title-question">Kim jesteś?</h2>
 
     <div class="btn-group">
-      <a href="nauczyciel.html" class="neu-btn teacher">
+      <a href="nauczyciel.html" class="neu-btn">
         <span class="icon">🎓</span>
         <span>Nauczyciel</span>
       </a>
 
-      <a href="uczen.html" class="neu-btn student">
+      <a href="uczen.html" class="neu-btn">
         <span class="icon">🎮</span>
         <span>Uczeń</span>
       </a>
