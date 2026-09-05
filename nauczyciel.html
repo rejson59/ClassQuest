@@ -3,432 +3,415 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ClassQuest - Dashboard Nauczyciela</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
-  
+  <title>Panel Nauczyciela - Classroom Quiz</title>
   <style>
-    :root {
-      --bg: #e6ecf5;
-      --text-main: #2d3748;
-      --text-muted: #718096;
-      --accent: #2563eb;
-      --accent-green: #10b981;
-
-      --shadow-dark: rgba(166, 180, 200, 0.7);
-      --shadow-light: #ffffff;
-    }
-
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
     body {
-      background-color: var(--bg);
+      background: #0f172a;
+      color: #f8fafc;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      padding: 20px;
     }
 
-    .main-wrapper {
-      width: 100%;
-      max-width: 1100px;
+    /* Nawigacja Górna */
+    header {
+      background: #1e293b;
+      border-bottom: 1px solid #334155;
+      padding: 16px 32px;
       display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-
-    /* Karta bazowa */
-    .neu-card {
-      background: linear-gradient(145deg, #f0f6ff, #e0e7f1);
-      border-radius: 28px;
-      padding: 26px;
-      
-      box-shadow: 
-        12px 12px 24px var(--shadow-dark),
-        -12px -12px 24px var(--shadow-light);
-
-      opacity: 0;
-      transform: translate(-15px, -15px) scale(0.96);
-      animation: cardAppear 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    @keyframes cardAppear {
-      to {
-        opacity: 1;
-        transform: translate(0, 0) scale(1);
-      }
-    }
-
-    /* TOPBAR / MENU GÓRNE */
-    .topbar {
-      display: flex;
-      align-items: center;
       justify-content: space-between;
-      padding: 16px 28px;
-      animation-delay: 0.1s;
-      position: relative;
-      z-index: 100;
+      align-items: center;
     }
 
-    .brand {
+    header h1 {
+      font-size: 1.4rem;
+      color: #38bdf8;
+    }
+
+    .user-info {
       display: flex;
       align-items: center;
-      gap: 12px;
-    }
-
-    .logo-text {
-      font-size: 1.6rem;
-      font-weight: 800;
-      color: var(--text-main);
-      letter-spacing: -0.5px;
-    }
-
-    .user-menu-wrapper {
-      position: relative;
-    }
-
-    /* Przycisk profilu wyzwalający menu */
-    .profile-btn {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 16px;
-      border-radius: 20px;
-      background: linear-gradient(145deg, #ffffff, #dbe2ed);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      cursor: pointer;
-      box-shadow: 
-        5px 5px 10px var(--shadow-dark),
-        -5px -5px 10px var(--shadow-light);
-      transition: all 0.2s ease;
-    }
-
-    .profile-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 
-        7px 7px 14px var(--shadow-dark),
-        -7px -7px 14px var(--shadow-light);
-    }
-
-    .avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: var(--accent);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 0.85rem;
+      gap: 16px;
     }
 
     .user-name {
-      font-weight: 700;
-      font-size: 0.9rem;
-      color: var(--text-main);
+      color: #cbd5e1;
+      font-weight: 600;
     }
 
-    /* Płynnie rozwijane menu (Dropdown) */
-    .dropdown-menu {
-      position: absolute;
-      top: 120%;
-      right: 0;
-      width: 200px;
-      background: linear-gradient(145deg, #f0f6ff, #e0e7f1);
-      border-radius: 20px;
-      padding: 12px;
-      box-shadow: 
-        10px 10px 20px var(--shadow-dark),
-        -10px -10px 20px var(--shadow-light);
-      
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(-10px) scale(0.95);
-      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .dropdown-menu.active {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0) scale(1);
-    }
-
-    .dropdown-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
-      border-radius: 12px;
-      color: var(--text-main);
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 0.85rem;
-      transition: background 0.2s ease, color 0.2s ease;
-    }
-
-    .dropdown-item:hover {
-      background: rgba(37, 99, 235, 0.08);
-      color: var(--accent);
-    }
-
-    /* SIATKA 3-KOLUMNOWA */
-    .grid-3 {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-    }
-
-    .col-1 { animation-delay: 0.2s; }
-    .col-2 { animation-delay: 0.32s; }
-    .col-3 { animation-delay: 0.44s; }
-
-    /* LEKCJE DÓŁ (2 KOLUMNY) */
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 24px;
-    }
-
-    .row-2-left { animation-delay: 0.56s; }
-    .row-2-right { animation-delay: 0.68s; }
-
-    @media (max-width: 900px) {
-      .grid-3, .grid-2 { grid-template-columns: 1fr; }
-    }
-
-    .card-title {
-      font-size: 1rem;
-      font-weight: 800;
-      color: var(--text-main);
-      margin-bottom: 16px;
-    }
-
-    /* Wklęsły Input */
-    .neu-input {
-      width: 100%;
-      padding: 14px 18px;
-      border-radius: 16px;
-      border: none;
-      outline: none;
-      background: linear-gradient(145deg, #dbe2ed, #ffffff);
-      color: var(--text-main);
-      font-size: 0.9rem;
-      font-weight: 700;
-      margin-bottom: 14px;
-
-      box-shadow: 
-        inset 4px 4px 8px var(--shadow-dark),
-        inset -4px -4px 8px var(--shadow-light);
-
-      transition: box-shadow 0.2s ease;
-    }
-
-    .neu-input::placeholder { color: var(--text-muted); font-weight: 600; }
-    .neu-input:focus {
-      box-shadow: 
-        inset 5px 5px 10px var(--shadow-dark),
-        inset -5px -5px 10px var(--shadow-light),
-        0 0 0 2px var(--accent);
-    }
-
-    /* Przycisk rozwinięcia */
-    .neu-btn {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 14px 18px;
-      border-radius: 18px;
-      
-      background: linear-gradient(145deg, #ffffff, #dbe2ed);
-      color: var(--text-main);
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 0.9rem;
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      
-      box-shadow: 
-        6px 6px 12px var(--shadow-dark),
-        -6px -6px 12px var(--shadow-light),
-        inset 1px 1px 1px #ffffff;
-
-      opacity: 0;
-      transform: scaleX(0.5) translateY(12px);
-      transform-origin: center;
-      animation: btnExpand 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-      
-      transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease, color 0.2s ease;
+    .btn-logout {
+      background: transparent;
+      border: 1px solid #ef4444;
+      color: #fca5a5;
+      padding: 6px 14px;
+      border-radius: 6px;
       cursor: pointer;
-      user-select: none;
+      transition: all 0.2s;
     }
 
-    .btn-delay-1 { animation-delay: 0.4s; }
-    .btn-delay-2 { animation-delay: 0.5s; }
+    .btn-logout:hover {
+      background: #ef4444;
+      color: #fff;
+    }
 
-    @keyframes btnExpand {
-      to {
-        opacity: 1;
-        transform: scaleX(1) translateY(0);
+    /* Główny układ */
+    main {
+      padding: 32px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 32px;
+    }
+
+    @media (max-width: 768px) {
+      main {
+        grid-template-columns: 1fr;
       }
     }
 
-    .neu-btn:hover {
-      color: var(--accent);
-      box-shadow: 
-        8px 8px 16px var(--shadow-dark),
-        -8px -8px 16px var(--shadow-light);
-      transform: scaleX(1) translateY(-2px);
+    /* Karty UI */
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
     }
 
-    .neu-btn:active {
-      transform: scaleX(1) translateY(1px);
-      background: linear-gradient(145deg, #dbe2ed, #ffffff);
-      box-shadow: 
-        inset 5px 5px 10px var(--shadow-dark),
-        inset -5px -5px 10px var(--shadow-light);
+    .card h2 {
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+      color: #f1f5f9;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 8px;
     }
 
-    /* Kafelki statystyk wstrzyknięte w wklęsły box */
-    .stat-box {
-      padding: 14px;
-      border-radius: 16px;
-      background: linear-gradient(145deg, #dbe2ed, #ffffff);
-      text-align: center;
+    /* Formularze */
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 6px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: #fff;
+      outline: none;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      border-color: #38bdf8;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* Przyciski */
+    .btn {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      background: #0284c7;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      background: #0369a1;
+    }
+
+    .btn-success {
+      background: #16a34a;
+    }
+
+    .btn-success:hover {
+      background: #15803d;
+    }
+
+    /* Lista zestawów */
+    .set-item {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 14px 18px;
       margin-bottom: 10px;
-      box-shadow: 
-        inset 3px 3px 6px var(--shadow-dark),
-        inset -3px -3px 6px var(--shadow-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: border-color 0.2s;
     }
 
-    .stat-num { font-size: 1.4rem; font-weight: 800; color: var(--accent); }
-    .stat-text { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
-
-    /* Podskakujące litery */
-    .char {
-      display: inline-block;
-      opacity: 0;
-      transform: translateY(14px);
-      animation: letterJump 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    .set-item:hover, .set-item.active {
+      border-color: #38bdf8;
     }
 
-    @keyframes letterJump {
-      0% { opacity: 0; transform: translateY(14px); }
-      60% { transform: translateY(-4px); }
-      100% { opacity: 1; transform: translateY(0); }
+    .set-item h3 {
+      font-size: 1rem;
+      color: #f8fafc;
+    }
+
+    .set-item p {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #64748b;
+      padding: 24px;
     }
   </style>
 </head>
 <body>
 
-  <div class="main-wrapper">
-    
-    <!-- TOPBAR / NAGŁÓWEK NA KAŻDEJ PODSTRONIE -->
-    <div class="neu-card topbar">
-      <div class="brand">
-        <span style="font-size: 1.4rem;">🎓</span>
-        <span class="logo-text" id="logoText">ClassQuest</span>
+  <header>
+    <h1>Classroom Quiz — Panel Nauczyciela</h1>
+    <div class="user-info">
+      <span class="user-name" id="teacher-display">Ładowanie...</span>
+      <button class="btn-logout" onclick="logoutTeacher()">Wyloguj</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Lewa Kolumna: Zestawy pytań -->
+    <section>
+      <div class="card">
+        <h2>Stwórz Nowy Zestaw</h2>
+        <form id="create-set-form">
+          <div class="form-group">
+            <label for="set-title">Nazwa zestawu</label>
+            <input type="text" id="set-title" placeholder="np. Historia - Mieszko I" required>
+          </div>
+          <button type="submit" class="btn">Dodaj Zestaw</button>
+        </form>
       </div>
 
-      <div class="user-menu-wrapper">
-        <button class="profile-btn" id="profileBtn">
-          <div class="avatar">N</div>
-          <span class="user-name">Prof. Kowalski</span>
-          <span style="font-size: 0.7rem;">▼</span>
-        </button>
-
-        <div class="dropdown-menu" id="dropdownMenu">
-          <a href="#" class="dropdown-item">⚙️ Ustawienia</a>
-          <a href="#" class="dropdown-item">📊 Raporty</a>
-          <a href="index.html" class="dropdown-item" style="color: #ef4444;">🚪 Wyloguj</a>
+      <div class="card">
+        <h2>Moje Zestawy Pytań</h2>
+        <div id="sets-list">
+          <div class="empty-state">Pobieranie zestawów...</div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- SIATKA 3 KOLUMN W JEDNEJ LINII -->
-    <div class="grid-3">
-      
-      <!-- KOLUMNA 1: SZYBKI START -->
-      <div class="neu-card col-1">
-        <div class="card-title">🚀 Szybka Lekcja</div>
-        <input type="text" class="neu-input" placeholder="Wpisz temat lekcji..." />
-        <button class="neu-btn btn-delay-1" style="color: var(--accent);">Rozpocznij teraz</button>
+    <!-- Prawa Kolumna: Zarządzanie pytaniami & Uruchamianie Gry -->
+    <section>
+      <div class="card" id="session-card" style="display: none;">
+        <h2>Uruchom Grę dla Uczniów</h2>
+        <p style="color: #94a3b8; margin-bottom: 12px; font-size: 0.9rem;">
+          Wybrany zestaw: <b id="selected-set-title" style="color: #38bdf8;">—</b>
+        </p>
+        <button class="btn btn-success" id="start-game-btn">Stwórz Pokój Gry (Wygeneruj Kod)</button>
       </div>
 
-      <!-- KOLUMNA 2: STATYSTYKA -->
-      <div class="neu-card col-2">
-        <div class="card-title">📊 Dziś w klasach</div>
-        <div class="stat-box">
-          <div class="stat-num">28</div>
-          <div class="stat-text">Uczniów online</div>
-        </div>
+      <div class="card" id="question-card" style="display: none;">
+        <h2>Dodaj Pytanie do Zestawu</h2>
+        <form id="add-question-form">
+          <div class="form-group">
+            <label for="q-text">Treść pytania</label>
+            <input type="text" id="q-text" placeholder="Treść pytania..." required>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="op-a">Opcja A</label>
+              <input type="text" id="op-a" required>
+            </div>
+            <div class="form-group">
+              <label for="op-b">Opcja B</label>
+              <input type="text" id="op-b" required>
+            </div>
+            <div class="form-group">
+              <label for="op-c">Opcja C</label>
+              <input type="text" id="op-c" required>
+            </div>
+            <div class="form-group">
+              <label for="op-d">Opcja D</label>
+              <input type="text" id="op-d" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="correct-op">Poprawna Odpowiedź</label>
+            <select id="correct-op" required>
+              <option value="A">Opcja A</option>
+              <option value="B">Opcja B</option>
+              <option value="C">Opcja C</option>
+              <option value="D">Opcja D</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn">Zapisz Pytanie</button>
+        </form>
       </div>
 
-      <!-- KOLUMNA 3: SZYBKIE AKCJE -->
-      <div class="neu-card col-3">
-        <div class="card-title">⚡ Akcje</div>
-        <button class="neu-btn btn-delay-2" style="margin-bottom: 10px;">➕ Nowy Quiz</button>
-        <button class="neu-btn btn-delay-2">📚 Biblioteka</button>
+      <div class="card" id="questions-list-card" style="display: none;">
+        <h2>Lista Pytań w Zestawie</h2>
+        <div id="questions-list"></div>
       </div>
+    </section>
+  </main>
 
-    </div>
-
-    <!-- DOLNY RZĄD: OSTATNIE LEKCJE ROZBITO NA 2 MIEJSCE KARTY -->
-    <div class="grid-2">
-      <div class="neu-card row-2-left">
-        <div class="card-title">📐 Matematyka - Klasa 8B</div>
-        <p style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600; margin-bottom: 14px;">Ostatnio używane: Twierdzenie Pitagorasa</p>
-        <button class="neu-btn">Wznów Lekcję</button>
-      </div>
-
-      <div class="neu-card row-2-right">
-        <div class="card-title">🧪 Chemia - Klasa 7A</div>
-        <p style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600; margin-bottom: 14px;">Ostatnio używane: Układ Okresowy</p>
-        <button class="neu-btn">Wznów Lekcję</button>
-      </div>
-    </div>
-
-  </div>
-
+  <script src="supabase.js"></script>
   <script>
-    // Fala liter dla nazwy w menu
-    function animateText(elementId, baseDelay) {
-      const el = document.getElementById(elementId);
-      const text = el.innerText;
-      el.innerHTML = '';
-      
-      [...text].forEach((char, index) => {
-        const span = document.createElement('span');
-        span.className = 'char';
-        span.innerHTML = char === ' ' ? '&nbsp;' : char;
-        span.style.animationDelay = `${baseDelay + (index * 0.035)}s`;
-        el.appendChild(span);
+    let currentTeacher = null;
+    let selectedSetId = null;
+
+    // Asekuracja i inicjalizacja danych po załadowaniu
+    window.addEventListener('DOMContentLoaded', async () => {
+      // Weryfikacja zalogowania przez funkcję z supabase.js
+      currentTeacher = requireTeacherAuth();
+      if (currentTeacher) {
+        document.getElementById('teacher-display').textContent = currentTeacher.imie_nazwisko;
+        await loadTeacherSets();
+      }
+    });
+
+    // Pobieranie zestawów z bazy
+    async function loadTeacherSets() {
+      const container = document.getElementById('sets-list');
+      const { data, error } = await getTeacherSets(currentTeacher.id);
+
+      if (error) {
+        container.innerHTML = `<div class="empty-state">Błąd pobierania danych</div>`;
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        container.innerHTML = `<div class="empty-state">Brak zestawów. Stwórz pierwszy!</div>`;
+        return;
+      }
+
+      container.innerHTML = '';
+      data.forEach(set => {
+        const item = document.createElement('div');
+        item.className = `set-item ${selectedSetId === set.id ? 'active' : ''}`;
+        item.innerHTML = `
+          <div>
+            <h3>${set.nazwa_zestawu}</h3>
+            <p>ID: ${set.id}</p>
+          </div>
+        `;
+        item.onclick = () => selectSet(set.id, set.nazwa_zestawu);
+        container.appendChild(item);
       });
     }
 
-    animateText('logoText', 0.15);
+    // Dodawanie nowego zestawu
+    document.getElementById('create-set-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const titleInput = document.getElementById('set-title');
+      const title = titleInput.value.trim();
 
-    // Rozwijanie menu górnego
-    const profileBtn = document.getElementById('profileBtn');
-    const dropdownMenu = document.getElementById('dropdownMenu');
+      if (!title) return;
 
-    profileBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      dropdownMenu.classList.toggle('active');
+      const { data, error } = await createQuestionSet(currentTeacher.id, title);
+      if (error) {
+        alert('Błąd dodawania zestawu: ' + error);
+      } else {
+        titleInput.value = '';
+        await loadTeacherSets();
+        selectSet(data.id, data.nazwa_zestawu);
+      }
     });
 
-    document.addEventListener('click', () => {
-      dropdownMenu.classList.remove('active');
+    // Wybór zestawu z listy
+    async function selectSet(setId, setNazwa) {
+      selectedSetId = setId;
+      document.getElementById('selected-set-title').textContent = setNazwa;
+
+      document.getElementById('session-card').style.display = 'block';
+      document.getElementById('question-card').style.display = 'block';
+      document.getElementById('questions-list-card').style.display = 'block';
+
+      await loadTeacherSets(); // Odświeża aktywny stan na liście
+      await loadQuestions(setId);
+    }
+
+    // Pobieranie pytań z wybranego zestawu
+    async function loadQuestions(setId) {
+      const container = document.getElementById('questions-list');
+      const { data, error } = await getQuestionsFromSet(setId);
+
+      if (error || !data || data.length === 0) {
+        container.innerHTML = `<div class="empty-state">Brak pytań w tym zestawie. Dodaj pierwsze!</div>`;
+        return;
+      }
+
+      container.innerHTML = data.map((q, idx) => `
+        <div style="background: #0f172a; padding: 12px; border-radius: 6px; margin-bottom: 8px;">
+          <b style="color: #38bdf8;">${idx + 1}. ${q.pytanie}</b>
+          <div style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px;">
+            A: ${q.opcja_a} | B: ${q.opcja_b} | C: ${q.opcja_c} | D: ${q.opcja_d}
+            <span style="color: #4ade80;"> (Poprawna: ${q.poprawna_opcja})</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Dodawanie nowego pytania
+    document.getElementById('add-question-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!selectedSetId) return;
+
+      const questionData = {
+        pytanie: document.getElementById('q-text').value.trim(),
+        opcja_a: document.getElementById('op-a').value.trim(),
+        opcja_b: document.getElementById('op-b').value.trim(),
+        opcja_c: document.getElementById('op-c').value.trim(),
+        opcja_d: document.getElementById('op-d').value.trim(),
+        poprawna_opcja: document.getElementById('correct-op').value
+      };
+
+      const { error } = await addQuestion(selectedSetId, questionData);
+      if (error) {
+        alert('Błąd zapisywania pytania: ' + error);
+      } else {
+        document.getElementById('add-question-form').reset();
+        await loadQuestions(selectedSetId);
+      }
+    });
+
+    // Tworzenie nowej sesji gry (Generowanie Kodu)
+    document.getElementById('start-game-btn').addEventListener('click', async () => {
+      if (!selectedSetId) return;
+
+      // Generowanie losowego 6-cyfrowego kodu
+      const gameCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+      const { data, error } = await createGameSession(selectedSetId, gameCode);
+      if (error) {
+        alert('Błąd tworzenia sesji gry: ' + error);
+      } else {
+        // Przechodzimy do widoku lobby dla nauczyciela z kodem pokoju w URL
+        window.location.href = `lobby_nauczyciel.html?kod=${gameCode}&session_id=${data.id}`;
+      }
     });
   </script>
-
 </body>
 </html>
