@@ -6,17 +6,33 @@
   <title>ClassQuest - Wybierz profil</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <style>
+    /* Zmienne dla motywu jasnego (Light Mode) */
     :root {
       --bg: #e6ecf5;
       --text-main: #2d3748;
       --text-muted: #718096;
-      --accent: #2563eb;
-
+      --blue-main: #2563eb;
+      --blue-glow: rgba(37, 99, 235, 0.45);
+      
       --shadow-dark: rgba(166, 180, 200, 0.7);
       --shadow-light: #ffffff;
+      --card-bg: #e6ecf5;
+    }
+
+    /* Zmienne dla motywu ciemnego (Dark Mode) */
+    [data-theme="dark"] {
+      --bg: #1e232a;
+      --text-main: #e2e8f0;
+      --text-muted: #64748b;
+      --blue-main: #3b82f6;
+      --blue-glow: rgba(59, 130, 246, 0.5);
+      
+      --shadow-dark: rgba(15, 18, 22, 0.8);
+      --shadow-light: rgba(45, 53, 64, 0.5);
+      --card-bg: #1e232a;
     }
 
     * {
@@ -24,6 +40,7 @@
       margin: 0;
       padding: 0;
       font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: background-color 0.4s ease, color 0.4s ease, box-shadow 0.3s ease;
     }
 
     body {
@@ -36,21 +53,22 @@
       overflow: hidden;
     }
 
-    /* Karta główna - Krok 1 w sekwencji pojawiania się (Top-Left) */
+    /* Karta Główna */
     .neu-card {
-      background: linear-gradient(145deg, #f0f6ff, #e0e7f1);
+      background: var(--card-bg);
       border-radius: 36px;
-      padding: 52px 42px;
+      padding: 48px 42px;
       width: 100%;
-      max-width: 420px;
+      max-width: 440px;
       text-align: center;
+      position: relative;
       
       box-shadow: 
-        20px 20px 40px var(--shadow-dark),
-        -20px -20px 40px var(--shadow-light);
+        25px 25px 50px var(--shadow-dark),
+        -25px -25px 50px var(--shadow-light);
 
       opacity: 0;
-      transform: translate(-30px, -30px) scale(0.95);
+      transform: translate(-30px, -30px) scale(0.96);
       animation: cardAppear 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
@@ -59,6 +77,45 @@
         opacity: 1;
         transform: translate(0, 0) scale(1);
       }
+    }
+
+    /* Górny pasek z przełącznikiem motywu */
+    .top-bar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 8px;
+    }
+
+    .theme-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: var(--card-bg);
+      border: none;
+      color: var(--text-main);
+      font-size: 1.1rem;
+      cursor: pointer;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 
+        6px 6px 12px var(--shadow-dark),
+        -6px -6px 12px var(--shadow-light);
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+      user-select: none;
+    }
+
+    .theme-btn:hover {
+      transform: translateY(-2px) scale(1.05);
+      color: var(--blue-main);
+    }
+
+    .theme-btn:active {
+      transform: translateY(1px) scale(0.95);
+      box-shadow: 
+        inset 3px 3px 6px var(--shadow-dark),
+        inset -3px -3px 6px var(--shadow-light);
     }
 
     /* Animacja liter tekstowych */
@@ -70,21 +127,12 @@
     }
 
     @keyframes letterJump {
-      0% {
-        opacity: 0;
-        transform: translateY(18px);
-      }
-      60% {
-        transform: translateY(-6px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      60% { transform: translateY(-6px); }
+      100% { opacity: 1; transform: translateY(0); }
     }
 
     .logo {
-      font-size: 2.5rem;
+      font-size: 2.4rem;
       font-weight: 800;
       letter-spacing: -1px;
       margin-bottom: 6px;
@@ -93,62 +141,56 @@
 
     .subtitle {
       color: var(--text-muted);
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: 600;
-      margin-bottom: 40px;
+      margin-bottom: 36px;
     }
 
     .title-question {
       font-size: 1.1rem;
       font-weight: 700;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
       color: var(--text-main);
     }
 
     .btn-group {
       display: flex;
       flex-direction: column;
-      gap: 22px;
+      gap: 20px;
     }
 
-    /* Przycisk: Startuje krótki i rozwija się sprężysto do pełnego wymiaru */
+    /* Przycisk Neumorficzny z fizyką rozwijania i kliknięcia */
     .neu-btn {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 12px;
-      padding: 20px 26px;
-      border-radius: 24px;
-      
-      background: linear-gradient(145deg, #ffffff, #dbe2ed);
+      padding: 18px 26px;
+      border-radius: 22px;
+      background: var(--card-bg);
       color: var(--text-main);
       text-decoration: none;
       font-weight: 700;
       font-size: 1.05rem;
-      border: 1px solid rgba(255, 255, 255, 0.6);
+      border: none;
+      cursor: pointer;
+      outline: none;
       
       box-shadow: 
-        7px 7px 14px var(--shadow-dark),
-        -7px -7px 14px var(--shadow-light),
-        inset 1px 1px 1px #ffffff;
+        8px 8px 16px var(--shadow-dark),
+        -8px -8px 16px var(--shadow-light);
 
       opacity: 0;
       transform: scaleX(0.45) translateY(20px);
       transform-origin: center;
       animation: btnExpand 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
       
-      transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease, color 0.2s ease;
-      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, color 0.2s ease;
       user-select: none;
     }
 
-    .neu-btn-1 {
-      animation-delay: 0.55s;
-    }
-
-    .neu-btn-2 {
-      animation-delay: 0.7s;
-    }
+    .neu-btn-1 { animation-delay: 0.55s; }
+    .neu-btn-2 { animation-delay: 0.7s; }
 
     @keyframes btnExpand {
       to {
@@ -158,21 +200,18 @@
     }
 
     .neu-btn:hover {
-      color: var(--accent);
-      box-shadow: 
-        10px 10px 20px var(--shadow-dark),
-        -10px -10px 20px var(--shadow-light),
-        inset 1px 1px 2px #ffffff;
+      color: var(--blue-main);
       transform: scaleX(1) translateY(-3px);
+      box-shadow: 
+        12px 12px 24px var(--shadow-dark),
+        -12px -12px 24px var(--shadow-light);
     }
 
-    /* Płynne zapadanie się z wypukłego w wklęsły (Inverted Neumorphism) */
     .neu-btn:active {
       transform: scaleX(1) translateY(1px);
-      background: linear-gradient(145deg, #dbe2ed, #ffffff);
       box-shadow: 
-        inset 6px 6px 12px var(--shadow-dark),
-        inset -6px -6px 12px var(--shadow-light);
+        inset 5px 5px 10px var(--shadow-dark),
+        inset -5px -5px 10px var(--shadow-light);
     }
 
     .icon {
@@ -189,6 +228,10 @@
 <body>
 
   <div class="neu-card">
+    <div class="top-bar">
+      <button class="theme-btn" id="themeToggle" title="Zmień motyw">🌙</button>
+    </div>
+
     <div class="logo" id="logoText">ClassQuest</div>
     <p class="subtitle" id="subtitleText">Interaktywna platforma lekcyjna</p>
     
@@ -208,9 +251,10 @@
   </div>
 
   <script>
-    // Skrypt do dzielenia tekstu na poszczególne litery z opóźnieniem animacji (efekt fali)
+    // 1. Animacja liter tekstowych (efekt fali)
     function animateText(elementId, baseDelay) {
       const el = document.getElementById(elementId);
+      if (!el) return;
       const text = el.innerText;
       el.innerHTML = '';
       
@@ -218,16 +262,32 @@
         const span = document.createElement('span');
         span.className = 'char';
         span.innerHTML = char === ' ' ? '&nbsp;' : char;
-        // Obliczenie opóźnienia tak, by światło przechodziło z lewej do prawej
         span.style.animationDelay = `${baseDelay + (index * 0.035)}s`;
         el.appendChild(span);
       });
     }
 
-    // Sekwencja po przekątnej
     animateText('logoText', 0.2);
     animateText('subtitleText', 0.35);
     animateText('questionText', 0.48);
+
+    // 2. Przełącznik Dark Mode z zapisywaniem stanu w localStorage
+    const themeToggleBtn = document.getElementById('themeToggle');
+    const savedTheme = localStorage.getItem('theme');
+    let isDark = savedTheme === 'dark';
+
+    function applyTheme(dark) {
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+      themeToggleBtn.textContent = dark ? '☀️' : '🌙';
+      localStorage.setItem('theme', dark ? 'dark' : 'light');
+    }
+
+    applyTheme(isDark);
+
+    themeToggleBtn.addEventListener('click', () => {
+      isDark = !isDark;
+      applyTheme(isDark);
+    });
   </script>
 
 </body>
