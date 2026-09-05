@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classroom Quiz - Logowanie Nauczyciela</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .auth-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    .auth-card h1 {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+      text-align: center;
+      color: #38bdf8;
+    }
+
+    .auth-card p.subtitle {
+      text-align: center;
+      color: #94a3b8;
+      font-size: 0.95rem;
+      margin-bottom: 28px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus {
+      border-color: #38bdf8;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      background: #0284c7;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      background: #0369a1;
+    }
+
+    .btn:disabled {
+      background: #475569;
+      cursor: not-allowed;
+    }
+
+    .toggle-mode {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 0.9rem;
+      color: #94a3b8;
+    }
+
+    .toggle-mode a {
+      color: #38bdf8;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .toggle-mode a:hover {
+      text-decoration: underline;
+    }
+
+    .error-msg {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid #ef4444;
+      color: #fca5a5;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      margin-bottom: 20px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-card">
+    <h1 id="form-title">Panel Nauczyciela</h1>
+    <p class="subtitle" id="form-subtitle">Zaloguj się, aby zarządzać quizami</p>
+
+    <div id="error-box" class="error-msg"></div>
+
+    <form id="auth-form">
+      <div class="form-group">
+        <label for="name">Imię i Nazwisko</label>
+        <input type="text" id="name" placeholder="np. Jan Kowalski" required autocomplete="username">
+      </div>
+
+      <div class="form-group">
+        <label for="password">Hasło</label>
+        <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+
+      <button type="submit" id="submit-btn" class="btn">Zaloguj się</button>
+    </form>
+
+    <div class="toggle-mode">
+      <span id="toggle-text">Nie masz jeszcze konta?</span>
+      <a id="toggle-link">Zarejestruj się</a>
+    </div>
+  </div>
+
+  <!-- Podpięcie wspólnego pliku Supabase -->
+  <script src="supabase.js"></script>
+
+  <script>
+    let isRegisterMode = false;
+
+    const formTitle = document.getElementById('form-title');
+    const formSubtitle = document.getElementById('form-subtitle');
+    const submitBtn = document.getElementById('submit-btn');
+    const toggleText = document.getElementById('toggle-text');
+    const toggleLink = document.getElementById('toggle-link');
+    const errorBox = document.getElementById('error-box');
+    const authForm = document.getElementById('auth-form');
+
+    // Sprawdzenie, czy nauczyciel jest już zalogowany
+    window.addEventListener('DOMContentLoaded', () => {
+      const activeTeacher = getCurrentTeacher();
+      if (activeTeacher) {
+        window.location.href = 'nauczyciel.html';
+      }
+    });
+
+    // Przełączanie trybu: Logowanie <-> Rejestracja
+    toggleLink.addEventListener('click', () => {
+      isRegisterMode = !isRegisterMode;
+      hideError();
+
+      if (isRegisterMode) {
+        formTitle.textContent = 'Nowe Konto';
+        formSubtitle.textContent = 'Zarejestruj się jako nauczyciel';
+        submitBtn.textContent = 'Zarejestruj się';
+        toggleText.textContent = 'Masz już konto?';
+        toggleLink.textContent = 'Zaloguj się';
+      } else {
+        formTitle.textContent = 'Panel Nauczyciela';
+        formSubtitle.textContent = 'Zaloguj się, aby zarządzać quizami';
+        submitBtn.textContent = 'Zaloguj się';
+        toggleText.textContent = 'Nie masz jeszcze konta?';
+        toggleLink.textContent = 'Zarejestruj się';
+      }
+    });
+
+    // Obsługa wysłania formularza
+    authForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideError();
+
+      const name = document.getElementById('name').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (!name || !password) {
+        showError('Proszę wypełnić wszystkie pola.');
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        if (isRegisterMode) {
+          // Wywołanie funkcji z pliku supabase.js
+          const result = await registerTeacher(name, password);
+          if (result.error) {
+            showError('Błąd rejestracji: ' + result.error);
+          } else {
+            window.location.href = 'nauczyciel.html';
+          }
+        } else {
+          // Wywołanie funkcji z pliku supabase.js
+          const result = await loginTeacher(name, password);
+          if (result.error) {
+            showError(result.error);
+          } else {
+            window.location.href = 'nauczyciel.html';
+          }
+        }
+      } catch (err) {
+        showError('Wystąpił nieoczekiwany błąd. Spróbuj ponownie.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.style.display = 'block';
+    }
+
+    function hideError() {
+      errorBox.style.display = 'none';
+      errorBox.textContent = '';
+    }
+
+    function setLoading(isLoading) {
+      submitBtn.disabled = isLoading;
+      submitBtn.textContent = isLoading 
+        ? (isRegisterMode ? 'Rejestrowanie...' : 'Logowanie...') 
+        : (isRegisterMode ? 'Zarejestruj się' : 'Zaloguj się');
+    }
+  </script>
+</body>
+</html>
