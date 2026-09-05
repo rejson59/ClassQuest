@@ -3,414 +3,503 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel Nauczyciela - Classroom Quiz</title>
+  <title>ClassQuest - Panel Nauczyciela</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
   <style>
+    /* Zmienne dla motywu jasnego (Light Mode) */
+    :root {
+      --bg: #e6ecf5;
+      --text-main: #4a5568;
+      --text-muted: #8c9ba5;
+      --blue-main: #2563eb;
+      --blue-glow: rgba(37, 99, 235, 0.45);
+      --green-main: #10b981;
+      --green-glow: rgba(16, 185, 129, 0.45);
+      --red-main: #ef4444;
+      --shadow-dark: rgba(166, 180, 200, 0.7);
+      --shadow-light: #ffffff;
+      --card-bg: #e6ecf5;
+    }
+
+    /* Zmienne dla motywu ciemnego (Dark Mode) */
+    [data-theme="dark"] {
+      --bg: #1e232a;
+      --text-main: #e2e8f0;
+      --text-muted: #64748b;
+      --blue-main: #3b82f6;
+      --blue-glow: rgba(59, 130, 246, 0.5);
+      --green-main: #10b981;
+      --green-glow: rgba(16, 185, 129, 0.5);
+      --red-main: #f87171;
+      --shadow-dark: rgba(15, 18, 22, 0.8);
+      --shadow-light: rgba(45, 53, 64, 0.5);
+      --card-bg: #1e232a;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: background-color 0.4s ease, color 0.4s ease, box-shadow 0.3s ease;
     }
 
     body {
-      background: #0f172a;
-      color: #f8fafc;
+      background-color: var(--bg);
+      color: var(--text-main);
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      padding: 30px 20px;
     }
 
-    /* Nawigacja Górna */
-    header {
-      background: #1e293b;
-      border-bottom: 1px solid #334155;
-      padding: 16px 32px;
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* Karta Neumorficzna */
+    .neu-card {
+      background: var(--card-bg);
+      border-radius: 28px;
+      padding: 32px;
+      box-shadow: 
+        16px 16px 32px var(--shadow-dark),
+        -16px -16px 32px var(--shadow-light);
+    }
+
+    /* Top Bar Header */
+    .header-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
     }
 
-    header h1 {
-      font-size: 1.4rem;
-      color: #38bdf8;
+    .logo {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--text-main);
     }
 
-    .user-info {
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .char {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(18px);
+      animation: letterJump 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes letterJump {
+      60% { transform: translateY(-6px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .header-actions {
       display: flex;
       align-items: center;
       gap: 16px;
     }
 
-    .user-name {
-      color: #cbd5e1;
-      font-weight: 600;
-    }
-
-    .btn-logout {
-      background: transparent;
-      border: 1px solid #ef4444;
-      color: #fca5a5;
-      padding: 6px 14px;
-      border-radius: 6px;
+    /* Przyciski Neumorficzne */
+    .neu-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 18px;
+      background: var(--card-bg);
+      color: var(--text-main);
+      font-weight: 700;
+      font-size: 0.95rem;
+      border: none;
       cursor: pointer;
-      transition: all 0.2s;
+      outline: none;
+      box-shadow: 
+        6px 6px 14px var(--shadow-dark),
+        -6px -6px 14px var(--shadow-light);
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, color 0.2s ease;
+      user-select: none;
     }
 
-    .btn-logout:hover {
-      background: #ef4444;
-      color: #fff;
+    .neu-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 
+        10px 10px 20px var(--shadow-dark),
+        -10px -10px 20px var(--shadow-light);
+      color: var(--blue-main);
     }
 
-    /* Główny układ */
-    main {
-      padding: 32px;
-      max-width: 1200px;
-      margin: 0 auto;
-      width: 100%;
+    .neu-btn:active {
+      transform: translateY(1px);
+      box-shadow: 
+        inset 3px 3px 6px var(--shadow-dark),
+        inset -3px -3px 6px var(--shadow-light);
+    }
+
+    .neu-btn-danger:hover {
+      color: var(--red-main);
+    }
+
+    .neu-btn-square {
+      width: 48px;
+      height: 48px;
+      padding: 0;
+      border-radius: 16px;
+    }
+
+    /* Układ Siatki */
+    .grid-layout {
       display: grid;
-      grid-template-columns: 1fr 2fr;
+      grid-template-columns: 1fr 1.8fr;
       gap: 32px;
     }
 
-    @media (max-width: 768px) {
-      main {
+    @media (max-width: 900px) {
+      .grid-layout {
         grid-template-columns: 1fr;
       }
     }
 
-    /* Karty UI */
-    .card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 24px;
+    /* Sekcje */
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
-    .card h2 {
-      font-size: 1.2rem;
+    /* Inputy i Formularze */
+    .neu-input-wrapper {
       margin-bottom: 16px;
-      color: #f1f5f9;
-      border-bottom: 1px solid #334155;
-      padding-bottom: 8px;
     }
 
-    /* Formularze */
-    .form-group {
-      margin-bottom: 14px;
-    }
-
-    .form-group label {
+    .neu-label {
       display: block;
       font-size: 0.85rem;
-      color: #94a3b8;
-      margin-bottom: 6px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      margin-left: 4px;
     }
 
-    .form-group input, .form-group select {
+    .neu-input, .neu-select {
       width: 100%;
-      padding: 10px 12px;
-      border-radius: 6px;
-      border: 1px solid #475569;
-      background: #0f172a;
-      color: #fff;
-      outline: none;
-    }
-
-    .form-group input:focus, .form-group select:focus {
-      border-color: #38bdf8;
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    /* Przyciski */
-    .btn {
-      width: 100%;
-      padding: 10px;
-      border-radius: 6px;
-      border: none;
-      background: #0284c7;
-      color: #fff;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .btn:hover {
-      background: #0369a1;
-    }
-
-    .btn-success {
-      background: #16a34a;
-    }
-
-    .btn-success:hover {
-      background: #15803d;
-    }
-
-    /* Lista zestawów */
-    .set-item {
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 8px;
       padding: 14px 18px;
-      margin-bottom: 10px;
+      border-radius: 16px;
+      border: 1px solid transparent;
+      outline: none;
+      background: var(--card-bg);
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 0.95rem;
+      box-shadow: 
+        inset 4px 4px 8px var(--shadow-dark),
+        inset -4px -4px 8px var(--shadow-light);
+      transition: all 0.3s ease;
+    }
+
+    .neu-input:focus, .neu-select:focus {
+      border-color: var(--blue-main);
+      box-shadow: 
+        inset 5px 5px 10px var(--shadow-dark),
+        inset -5px -5px 10px var(--shadow-light),
+        0 0 10px var(--blue-glow);
+    }
+
+    /* Listy i Elementy */
+    .student-list, .requests-list {
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .list-item {
+      display: flex;
       align-items: center;
-      cursor: pointer;
-      transition: border-color 0.2s;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-radius: 20px;
+      background: var(--card-bg);
+      box-shadow: 
+        6px 6px 14px var(--shadow-dark),
+        -6px -6px 14px var(--shadow-light);
     }
 
-    .set-item:hover, .set-item.active {
-      border-color: #38bdf8;
+    .student-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
-    .set-item h3 {
-      font-size: 1rem;
-      color: #f8fafc;
+    .student-name {
+      font-weight: 700;
+      font-size: 1.05rem;
     }
 
-    .set-item p {
+    .student-stats {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 10px;
       font-size: 0.8rem;
-      color: #64748b;
+      font-weight: 800;
+      background: var(--card-bg);
+      color: var(--blue-main);
+      box-shadow: 
+        inset 2px 2px 4px var(--shadow-dark),
+        inset -2px -2px 4px var(--shadow-light);
     }
 
     .empty-state {
       text-align: center;
-      color: #64748b;
+      color: var(--text-muted);
+      font-weight: 600;
       padding: 24px;
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>Classroom Quiz — Panel Nauczyciela</h1>
-    <div class="user-info">
-      <span class="user-name" id="teacher-display">Ładowanie...</span>
-      <button class="btn-logout" onclick="logoutTeacher()">Wyloguj</button>
-    </div>
-  </header>
-
-  <main>
-    <!-- Lewa Kolumna: Zestawy pytań -->
-    <section>
-      <div class="card">
-        <h2>Stwórz Nowy Zestaw</h2>
-        <form id="create-set-form">
-          <div class="form-group">
-            <label for="set-title">Nazwa zestawu</label>
-            <input type="text" id="set-title" placeholder="np. Historia - Mieszko I" required>
-          </div>
-          <button type="submit" class="btn">Dodaj Zestaw</button>
-        </form>
+  <div class="container">
+    <!-- Górny Pasek (Nawigacja i Profil) -->
+    <header class="neu-card header-bar">
+      <div>
+        <h1 class="logo" id="logoText">ClassQuest</h1>
+        <p class="subtitle" id="teacherWelcome">Wczytywanie danych...</p>
       </div>
 
-      <div class="card">
-        <h2>Moje Zestawy Pytań</h2>
-        <div id="sets-list">
-          <div class="empty-state">Pobieranie zestawów...</div>
-        </div>
+      <div class="header-actions">
+        <button class="neu-btn neu-btn-square" id="themeToggle" title="Zmień motyw">🌙</button>
+        <button class="neu-btn neu-btn-danger" id="logoutBtn">Wyloguj się 🚪</button>
       </div>
-    </section>
+    </header>
 
-    <!-- Prawa Kolumna: Zarządzanie pytaniami & Uruchamianie Gry -->
-    <section>
-      <div class="card" id="session-card" style="display: none;">
-        <h2>Uruchom Grę dla Uczniów</h2>
-        <p style="color: #94a3b8; margin-bottom: 12px; font-size: 0.9rem;">
-          Wybrany zestaw: <b id="selected-set-title" style="color: #38bdf8;">—</b>
-        </p>
-        <button class="btn btn-success" id="start-game-btn">Stwórz Pokój Gry (Wygeneruj Kod)</button>
-      </div>
-
-      <div class="card" id="question-card" style="display: none;">
-        <h2>Dodaj Pytanie do Zestawu</h2>
-        <form id="add-question-form">
-          <div class="form-group">
-            <label for="q-text">Treść pytania</label>
-            <input type="text" id="q-text" placeholder="Treść pytania..." required>
-          </div>
-
-          <div class="grid-2">
-            <div class="form-group">
-              <label for="op-a">Opcja A</label>
-              <input type="text" id="op-a" required>
-            </div>
-            <div class="form-group">
-              <label for="op-b">Opcja B</label>
-              <input type="text" id="op-b" required>
-            </div>
-            <div class="form-group">
-              <label for="op-c">Opcja C</label>
-              <input type="text" id="op-c" required>
-            </div>
-            <div class="form-group">
-              <label for="op-d">Opcja D</label>
-              <input type="text" id="op-d" required>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="correct-op">Poprawna Odpowiedź</label>
-            <select id="correct-op" required>
-              <option value="A">Opcja A</option>
-              <option value="B">Opcja B</option>
-              <option value="C">Opcja C</option>
-              <option value="D">Opcja D</option>
+    <!-- Główna zawartość -->
+    <div class="grid-layout">
+      
+      <!-- Panel Lewy: Zarządzanie i Przyznawanie XP -->
+      <div class="neu-card">
+        <h2 class="section-title">⚡ Przyznaj Punkty XP</h2>
+        
+        <form id="add-xp-form">
+          <div class="neu-input-wrapper">
+            <label class="neu-label" for="student-select">Wybierz Ucznia</label>
+            <select id="student-select" class="neu-select" required>
+              <option value="">Ładowanie listy uczniów...</option>
             </select>
           </div>
 
-          <button type="submit" class="btn">Zapisz Pytanie</button>
+          <div class="neu-input-wrapper">
+            <label class="neu-label" for="xp-amount">Ilość XP</label>
+            <input type="number" id="xp-amount" class="neu-input" placeholder="np. 50" min="1" required>
+          </div>
+
+          <div class="neu-input-wrapper">
+            <label class="neu-label" for="xp-reason">Powód / Zadanie</label>
+            <input type="text" id="xp-reason" class="neu-input" placeholder="np. Aktywność na lekcji" required>
+          </div>
+
+          <button type="submit" class="neu-btn" style="width: 100%; margin-top: 10px;">Dodaj XP ✨</button>
         </form>
       </div>
 
-      <div class="card" id="questions-list-card" style="display: none;">
-        <h2>Lista Pytań w Zestawie</h2>
-        <div id="questions-list"></div>
+      <!-- Panel Prawy: Lista Uczniów Klasy -->
+      <div class="neu-card">
+        <h2 class="section-title">🏆 Ranking i Poziomy Klasy</h2>
+        <div id="students-container" class="student-list">
+          <div class="empty-state">Pobieranie listy uczniów...</div>
+        </div>
       </div>
-    </section>
-  </main>
+
+    </div>
+
+    <!-- Sekcja Dodatkowa: Oczekujące Aktywności / Zgłoszenia -->
+    <div class="neu-card">
+      <h2 class="section-title">📥 Oczekujące Weryfikacje Zgłoszeń</h2>
+      <div id="requests-container" class="requests-list">
+        <div class="empty-state">Brak nowych zgłoszeń od uczniów.</div>
+      </div>
+    </div>
+  </div>
 
   <script src="supabase.js"></script>
+
   <script>
-    let currentTeacher = null;
-    let selectedSetId = null;
-
-    // Asekuracja i inicjalizacja danych po załadowaniu
-    window.addEventListener('DOMContentLoaded', async () => {
-      // Weryfikacja zalogowania przez funkcję z supabase.js
-      currentTeacher = requireTeacherAuth();
-      if (currentTeacher) {
-        document.getElementById('teacher-display').textContent = currentTeacher.imie_nazwisko;
-        await loadTeacherSets();
-      }
-    });
-
-    // Pobieranie zestawów z bazy
-    async function loadTeacherSets() {
-      const container = document.getElementById('sets-list');
-      const { data, error } = await getTeacherSets(currentTeacher.id);
-
-      if (error) {
-        container.innerHTML = `<div class="empty-state">Błąd pobierania danych</div>`;
-        return;
-      }
-
-      if (!data || data.length === 0) {
-        container.innerHTML = `<div class="empty-state">Brak zestawów. Stwórz pierwszy!</div>`;
-        return;
-      }
-
-      container.innerHTML = '';
-      data.forEach(set => {
-        const item = document.createElement('div');
-        item.className = `set-item ${selectedSetId === set.id ? 'active' : ''}`;
-        item.innerHTML = `
-          <div>
-            <h3>${set.nazwa_zestawu}</h3>
-            <p>ID: ${set.id}</p>
-          </div>
-        `;
-        item.onclick = () => selectSet(set.id, set.nazwa_zestawu);
-        container.appendChild(item);
+    // 1. Animacja liter w logo
+    function animateText(elementId, baseDelay) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      const text = el.innerText;
+      el.innerHTML = '';
+      
+      [...text].forEach((char, index) => {
+        const span = document.createElement('span');
+        span.className = 'char';
+        span.innerHTML = char === ' ' ? '&nbsp;' : char;
+        span.style.animationDelay = `${baseDelay + (index * 0.035)}s`;
+        el.appendChild(span);
       });
     }
 
-    // Dodawanie nowego zestawu
-    document.getElementById('create-set-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const titleInput = document.getElementById('set-title');
-      const title = titleInput.value.trim();
+    animateText('logoText', 0.2);
 
-      if (!title) return;
+    // 2. Obsługa Dark / Light Mode
+    const themeToggleBtn = document.getElementById('themeToggle');
+    const savedTheme = localStorage.getItem('theme');
+    let isDark = savedTheme === 'dark';
 
-      const { data, error } = await createQuestionSet(currentTeacher.id, title);
-      if (error) {
-        alert('Błąd dodawania zestawu: ' + error);
-      } else {
-        titleInput.value = '';
-        await loadTeacherSets();
-        selectSet(data.id, data.nazwa_zestawu);
-      }
-    });
-
-    // Wybór zestawu z listy
-    async function selectSet(setId, setNazwa) {
-      selectedSetId = setId;
-      document.getElementById('selected-set-title').textContent = setNazwa;
-
-      document.getElementById('session-card').style.display = 'block';
-      document.getElementById('question-card').style.display = 'block';
-      document.getElementById('questions-list-card').style.display = 'block';
-
-      await loadTeacherSets(); // Odświeża aktywny stan na liście
-      await loadQuestions(setId);
+    function applyTheme(dark) {
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+      themeToggleBtn.textContent = dark ? '☀️' : '🌙';
+      localStorage.setItem('theme', dark ? 'dark' : 'light');
     }
 
-    // Pobieranie pytań z wybranego zestawu
-    async function loadQuestions(setId) {
-      const container = document.getElementById('questions-list');
-      const { data, error } = await getQuestionsFromSet(setId);
+    applyTheme(isDark);
 
-      if (error || !data || data.length === 0) {
-        container.innerHTML = `<div class="empty-state">Brak pytań w tym zestawie. Dodaj pierwsze!</div>`;
+    themeToggleBtn.addEventListener('click', () => {
+      isDark = !isDark;
+      applyTheme(isDark);
+    });
+
+    // 3. Główna logika Panelu Nauczyciela
+    let currentTeacher = null;
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      currentTeacher = getCurrentTeacher();
+
+      if (!currentTeacher) {
+        window.location.href = 'logowanie.html';
         return;
       }
 
-      container.innerHTML = data.map((q, idx) => `
-        <div style="background: #0f172a; padding: 12px; border-radius: 6px; margin-bottom: 8px;">
-          <b style="color: #38bdf8;">${idx + 1}. ${q.pytanie}</b>
-          <div style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px;">
-            A: ${q.opcja_a} | B: ${q.opcja_b} | C: ${q.opcja_c} | D: ${q.opcja_d}
-            <span style="color: #4ade80;"> (Poprawna: ${q.poprawna_opcja})</span>
-          </div>
-        </div>
-      `).join('');
+      document.getElementById('teacherWelcome').textContent = `Witaj, ${currentTeacher.name}!`;
+
+      await loadStudents();
+      await loadPendingRequests();
+    });
+
+    // Ładowanie uczniów
+    async function loadStudents() {
+      const selectEl = document.getElementById('student-select');
+      const containerEl = document.getElementById('students-container');
+
+      try {
+        const students = await getStudentsByTeacher(currentTeacher.id);
+
+        if (!students || students.length === 0) {
+          selectEl.innerHTML = '<option value="">Brak uczniów w klasie</option>';
+          containerEl.innerHTML = '<div class="empty-state">Brak przypisanych uczniów.</div>';
+          return;
+        }
+
+        // Sortowanie po XP (malejąco)
+        students.sort((a, b) => (b.xp || 0) - (a.xp || 0));
+
+        // Wypełnianie Selecta
+        selectEl.innerHTML = '<option value="">-- Wybierz Ucznia --</option>' + 
+          students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+
+        // Wypełnianie Listy
+        containerEl.innerHTML = students.map((s, idx) => {
+          const level = Math.floor((s.xp || 0) / 100) + 1;
+          return `
+            <div class="list-item">
+              <div class="student-info">
+                <span class="student-name">#${idx + 1} ${s.name}</span>
+                <span class="student-stats">${s.xp || 0} XP • Poziom ${level}</span>
+              </div>
+              <span class="badge">Poziom ${level}</span>
+            </div>
+          `;
+        }).join('');
+
+      } catch (err) {
+        console.error("Błąd podczas ładowania uczniów:", err);
+        containerEl.innerHTML = '<div class="empty-state" style="color: var(--red-main)">Nie udało się pobrać listy uczniów.</div>';
+      }
     }
 
-    // Dodawanie nowego pytania
-    document.getElementById('add-question-form').addEventListener('submit', async (e) => {
+    // Dodawanie XP
+    document.getElementById('add-xp-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (!selectedSetId) return;
+      const studentId = document.getElementById('student-select').value;
+      const amount = parseInt(document.getElementById('xp-amount').value, 10);
+      const reason = document.getElementById('xp-reason').value.trim();
 
-      const questionData = {
-        pytanie: document.getElementById('q-text').value.trim(),
-        opcja_a: document.getElementById('op-a').value.trim(),
-        opcja_b: document.getElementById('op-b').value.trim(),
-        opcja_c: document.getElementById('op-c').value.trim(),
-        opcja_d: document.getElementById('op-d').value.trim(),
-        poprawna_opcja: document.getElementById('correct-op').value
-      };
+      if (!studentId || isNaN(amount) || !reason) return;
 
-      const { error } = await addQuestion(selectedSetId, questionData);
-      if (error) {
-        alert('Błąd zapisywania pytania: ' + error);
-      } else {
-        document.getElementById('add-question-form').reset();
-        await loadQuestions(selectedSetId);
+      try {
+        await addXpToStudent(studentId, amount, reason);
+        document.getElementById('xp-amount').value = '';
+        document.getElementById('xp-reason').value = '';
+        await loadStudents();
+      } catch (err) {
+        console.error("Błąd dodawania XP:", err);
       }
     });
 
-    // Tworzenie nowej sesji gry (Generowanie Kodu)
-    document.getElementById('start-game-btn').addEventListener('click', async () => {
-      if (!selectedSetId) return;
+    // Ładowanie oczekujących zgłoszeń
+    async function loadPendingRequests() {
+      const containerEl = document.getElementById('requests-container');
+      try {
+        const requests = await getPendingRequests(currentTeacher.id);
 
-      // Generowanie losowego 6-cyfrowego kodu
-      const gameCode = Math.floor(100000 + Math.random() * 900000).toString();
+        if (!requests || requests.length === 0) {
+          containerEl.innerHTML = '<div class="empty-state">Brak nowych zgłoszeń od uczniów.</div>';
+          return;
+        }
 
-      const { data, error } = await createGameSession(selectedSetId, gameCode);
-      if (error) {
-        alert('Błąd tworzenia sesji gry: ' + error);
-      } else {
-        // Przechodzimy do widoku lobby dla nauczyciela z kodem pokoju w URL
-        window.location.href = `lobby_nauczyciel.html?kod=${gameCode}&session_id=${data.id}`;
+        containerEl.innerHTML = requests.map(req => `
+          <div class="list-item">
+            <div class="student-info">
+              <span class="student-name">${req.student_name}</span>
+              <span class="student-stats">${req.task_name} (+${req.xp_reward} XP)</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="neu-btn" style="padding: 8px 14px;" onclick="handleApprove('${req.id}', '${req.student_id}', ${req.xp_reward})">Zatwierdź 👍</button>
+              <button class="neu-btn neu-btn-danger" style="padding: 8px 14px;" onclick="handleReject('${req.id}')">Odrzuć ❌</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error("Błąd ładowania zgłoszeń:", err);
       }
+    }
+
+    async function handleApprove(requestId, studentId, xp) {
+      await approveRequest(requestId, studentId, xp);
+      await loadStudents();
+      await loadPendingRequests();
+    }
+
+    async function handleReject(requestId) {
+      await rejectRequest(requestId);
+      await loadPendingRequests();
+    }
+
+    // Wylogowanie
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      logoutTeacher();
+      window.location.href = 'logowanie.html';
     });
   </script>
 </body>
