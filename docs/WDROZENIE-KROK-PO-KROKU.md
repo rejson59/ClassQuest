@@ -24,9 +24,11 @@ Ta runda pomaga mi przygotować i przetestować migrację. Możesz ją zrobić t
 
 ---
 
-## RUNDA 2 — Koyeb (aplikacja / „radiowęzeł") — ZROBISZ, GDY ZAWOŁAM
+## RUNDA 2 — Koyeb (aplikacja / „radiowęzeł") — MOŻESZ ZROBIĆ TERAZ
 
-Kolejność jest ważna: **najpierw ja kończę migrację kodu, potem Ty to robisz** (żebyś nie klikał na ślepo).
+Migracja kodu jest gotowa i przetestowana (na lokalnym Postgresie działa pełna gra).
+Aplikacja **sama utworzy tabele** w Supabase przy pierwszym starcie — nie musisz
+uruchamiać żadnego SQL ręcznie.
 
 1. Wejdź na **https://app.koyeb.com** → **Sign up** przez **GitHub**.
    - Jeśli przy rejestracji poproszą o kartę kredytową → **napisz mi**, przechodzimy na Render (instrukcja niżej; praca ta sama).
@@ -36,7 +38,7 @@ Kolejność jest ważna: **najpierw ja kończę migrację kodu, potem Ty to robi
    - **Build command**: `npm install && npm run build`
    - **Run command**: `npm start`
    - **Port**: `4001`
-4. Rozwiń sekcję **Environment variables** i dodaj trzy zmienne (wartości podam Ci na czacie wtedy, gdy zawołam — poza `DATABASE_URL`, którą skopiujesz z Supabase):
+4. Rozwiń sekcję **Environment variables** i dodaj trzy zmienne:
    | Nazwa | Wartość |
    |---|---|
    | `NODE_ENV` | `production` |
@@ -44,7 +46,7 @@ Kolejność jest ważna: **najpierw ja kończę migrację kodu, potem Ty to robi
    | `JWT_SECRET` | podam Ci gotową na czacie (możesz też wymyślić własny długi ciąg znaków) |
 5. Kliknij **Deploy** i poczekaj ~3–5 minut na pierwszy build.
 6. Gdy aplikacja wstanie, Koyeb pokaże Ci adres, np. `https://classquest--twojlogin.koyeb.app`. **Wklej mi ten adres na czacie** — sprawdzę, czy wszystko gra (logowanie, gry, panel admina).
-7. Zaloguj się przez swój adres: konto demo to `nauczyciel@demo.pl` / `demo1234` (albo od razu zarejestruj własne — pierwsze konto automatycznie zostaje administratorem).
+7. Wejdź na swój adres i **zarejestruj swoje konto** (e-mail + hasło) — pierwsze konto w bazie automatycznie zostaje **administratorem**. (Uwaga: na produkcji NIE ma konta demo — celowo, żeby nikt obcy nie mógł się zalogować.)
 
 ---
 
@@ -70,9 +72,17 @@ Kolejność jest ważna: **najpierw ja kończę migrację kodu, potem Ty to robi
 - ❌ Nie kasuj projektu Supabase ani nie zmieniaj regionu po utworzeniu.
 - ✅ Możesz wysyłać: adres aplikacji (`*.koyeb.app` / `*.onrender.com`), zrzuty ekranu z błędami.
 
-## Co się dzieje dalej (moja robota)
+## Co już jest zrobione (moja robota — 2026-09-06)
 
-1. Migracja kodu: baza SQLite → PostgreSQL (Supabase) — robię to w repo, z testami.
-2. Testy całej gry (logowanie, klasy, zestawy, pokoje, XP, panel `/admin`).
-3. Jak zawołam: Ty robisz Rundę 2 (albo 2-awaryjną) — to wszystko.
-4. Po wdrożeniu: sprawdzam na żywo, dodaję „budziki" (Supabase + ewentualnie Render) i zostawiam Cię z działającą platformą.
+1. ✅ Migracja kodu: serwer działa na SQLite **lub** PostgreSQL (Supabase) — jeden kod, wybór przez zmienną `DATABASE_URL`.
+2. ✅ Aplikacja sama tworzy tabele w Supabase przy pierwszym starcie (bez ręcznego SQL).
+3. ✅ Pierwsze zarejestrowane konto automatycznie zostaje administratorem (bezpieczne na produkcji).
+4. ✅ Przetestowane na prawdziwym Postgresie: pełna gra E2E (2 uczniów), cały REST, role, kaskady, eksport — zielone.
+5. ✅ Testy w repo (`testy/`), gotowe do odtworzenia po wdrożeniu na żywo.
+
+## Co jeszcze (po Twojej Rundzie 2)
+
+1. Ty robisz Rundę 2 (Koyeb) albo 2-awaryjną (Render) i wklejasz mi adres aplikacji.
+2. Ja sprawdzam na żywo (logowanie, rejestracja = admin, gry, panel `/admin`) i odtwarzam testy z `testy/`.
+3. Dodaję „budziki" (Supabase 1×/dzień, przy Renderze ping co 10 min), żeby nic nie usypiało na stałe.
+4. Doradzam zmianę hasła bazy Supabase (dla czystego sumienia po testach) i zostawiam Cię z działającą platformą.
