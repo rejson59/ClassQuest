@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import cookieParser from 'cookie-parser';
 
-import db from './db.js';
+import db, { initDb } from './db.js';
 import { mountRoutes } from './routes.js';
 import { initGame } from './game.js';
 
@@ -31,6 +31,8 @@ if (process.env.NODE_ENV === 'production' && fs.existsSync(distDir)) {
     res.sendFile(path.join(distDir, 'index.html'));
   });
 }
+
+await initDb();
 
 const httpServer = http.createServer(app);
 initGame(httpServer);

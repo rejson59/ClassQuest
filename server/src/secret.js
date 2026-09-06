@@ -14,6 +14,7 @@ export function getSecret() {
   try {
     return fs.readFileSync(file, 'utf8').trim();
   } catch {
+    fs.mkdirSync(path.dirname(file), { recursive: true });
     const secret = crypto.randomBytes(48).toString('hex');
     fs.writeFileSync(file, secret);
     return secret;

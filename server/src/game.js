@@ -175,45 +175,47 @@ export function initGame(httpServer) {
 
   function startGry(p) {
     if (p.faza !== 'lobby' || p.uczniowie.size === 0) return;
-    const q = db.prepare('SELECT * FROM pytania WHERE zestaw_id = ? ORDER BY id ASC').all(p.zestawId);
-    if (q.length === 0) return;
+    void (async () => {
+      const q = await db.all('SELECT * FROM pytania WHERE zestaw_id = ? ORDER BY id ASC', p.zestawId);
+      if (q.length === 0) return;
 
-    p.pytania = q;
-    p.indPytania = 0;
-    p.obecne = q[0];
-    p.status = 'playing';
-    db.prepare("UPDATE sesje SET status = 'playing' WHERE kod = ?").run(p.kod);
+      p.pytania = q;
+      p.indPytania = 0;
+      p.obecne = q[0];
+      p.status = 'playing';
+      await db.run("UPDATE sesje SET status = 'playing' WHERE kod = ?", p.kod);
 
-    if (p.tryb === 'budowlanci') {
-      // losowy, wyrównany podział na ekipy
-      const gracze = potasuj(listaUczniow(p));
-      const L = Math.min(p.liczbaEkip, gracze.length);
-      p.liczbaEkip = L;
-      p.ekipy = Array.from({ length: L }, (_, i) => ({
-        nazwa: `Ekipa ${i + 1}`,
-        kolor: EKIPA_PALETA[i % EKIPA_PALETA.length],
-        cegly: 0,
-        tarcze: 0,
-        koszt: 0
-      }));
-      const rozmiary = new Array(L).fill(0);
-      gracze.forEach((g, idx) => {
-        const e = idx % L;
-        g.ekipa = e;
-        g.karty = [];
-        g.podwojna = false;
-        g.odpowiedz = null;
-        g.odpowiedzial = false;
-        rozmiary[e]++;
-      });
-      p.ekipy.forEach((e, i) => { e.koszt = Math.max(2, Math.round(rozmiary[i] / 2)); });
-      p.kolejnosc = [];
-      p.ogloszenie = null;
-    }
+      if (p.tryb === 'budowlanci') {
+        // losowy, wyrównany podział na ekipy
+        const gracze = potasuj(listaUczniow(p));
+        const L = Math.min(p.liczbaEkip, gracze.length);
+        p.liczbaEkip = L;
+        p.ekipy = Array.from({ length: L }, (_, i) => ({
+          nazwa: `Ekipa ${i + 1}`,
+          kolor: EKIPA_PALETA[i % EKIPA_PALETA.length],
+          cegly: 0,
+          tarcze: 0,
+          koszt: 0
+        }));
+        const rozmiary = new Array(L).fill(0);
+        gracze.forEach((g, idx) => {
+          const e = idx % L;
+          g.ekipa = e;
+          g.karty = [];
+          g.podwojna = false;
+          g.odpowiedz = null;
+          g.odpowiedzial = false;
+          rozmiary[e]++;
+        });
+        p.ekipy.forEach((e, i) => { e.koszt = Math.max(2, Math.round(rozmiary[i] / 2)); });
+        p.kolejnosc = [];
+        p.ogloszenie = null;
+      }
 
-    p.faza = 'odliczanie';
-    p.fazaCzas = SWIAT.CZAS_ODLICZANIA;
-    rozglosStan(p);
+      p.faza = 'odliczanie';
+      p.fazaCzas = SWIAT.CZAS_ODLICZANIA;
+      rozglosStan(p);
+    })().catch((err) => console.error('Błąd startu gry:', err));
   }
 
   function czasPytania(p) {
@@ -332,7 +334,7 @@ export function initGame(httpServer) {
   function zakonczGre(p) {
     if (p.wynikiZapisane) return;
     p.wynikiZapisane = true;
-
+    void (async () => {
     const gracze = listaUczniow(p);
     let zwyciezcaEkipa = null;
     let finalne = [];
@@ -385,31 +387,25 @@ export function initGame(httpServer) {
     }
 
     // zapis do bazy w jednej transakcji
-    const insWynik = db.prepare(
-      'INSERT INTO wyniki_gier (sesja_kod, uczen_id, pozycja, xp_zdobyte, poprawne, zycia_zostalo) VALUES (?, ?, ?, ?, ?, ?)'
-    );
-    const updXp = db.prepare('UPDATE uczniowie SET xp = xp + ? WHERE id = ?');
-    const insLog = db.prepare(
-      'INSERT INTO xp_logi (uczen_id, zrodlo, kwota, opis, sesja_kod) VALUES (?, ?, ?, ?, ?)'
-    );
-    db.exec('BEGIN');
-    try {
-      db.prepare("UPDATE sesje SET status = 'finished', zakonczona_at = datetime('now') WHERE kod = ?").run(p.kod);
+    await db.withTx(async (tx) => {
+      await tx.run("UPDATE sesje SET status = 'finished', zakonczona_at = datetime('now') WHERE kod = ?", p.kod);
       for (const f of finalne) {
-        insWynik.run(p.kod, f.id, f.pozycja, f.xp, f.poprawne, f.zycia ?? 0);
+        await tx.run(
+          'INSERT INTO wyniki_gier (sesja_kod, uczen_id, pozycja, xp_zdobyte, poprawne, zycia_zostalo) VALUES (?, ?, ?, ?, ?, ?)',
+          p.kod, f.id, f.pozycja, f.xp, f.poprawne, f.zycia ?? 0
+        );
         if (f.xp > 0) {
-          updXp.run(f.xp, f.id);
+          await tx.run('UPDATE uczniowie SET xp = xp + ? WHERE id = ?', f.xp, f.id);
           const dodatki = [];
           if (f.wygrana && p.tryb === 'budowlanci') dodatki.push(`wygrana ekipy ${(zwyciezcaEkipa?.index ?? 0) + 1}`);
           if (f.wygrana && p.tryb === '4pola') dodatki.push('WYGRANA');
-          insLog.run(f.id, 'gra', f.xp, `Gra „${p.nazwaZestawu}”${dodatki.length ? ' — ' + dodatki.join(', ') : ''}`, p.kod);
+          await tx.run(
+            'INSERT INTO xp_logi (uczen_id, zrodlo, kwota, opis, sesja_kod) VALUES (?, ?, ?, ?, ?)',
+            f.id, 'gra', f.xp, `Gra „${p.nazwaZestawu}”${dodatki.length ? ' — ' + dodatki.join(', ') : ''}`, p.kod
+          );
         }
       }
-      db.exec('COMMIT');
-    } catch (err) {
-      db.exec('ROLLBACK');
-      throw err;
-    }
+    });
 
     p.status = 'finished';
     p.faza = 'koniec';
@@ -420,6 +416,7 @@ export function initGame(httpServer) {
       payload.zwyciezcaEkipa = zwyciezcaEkipa ? zwyciezcaEkipa.index : null;
     }
     io.to('pokoj:' + p.kod).emit('gra:koniec', payload);
+    })().catch((err) => console.error('Błąd zapisu wyników gry:', err));
   }
 
   // ---------- karty (budowlańcy) -------------------------------------------
@@ -574,48 +571,51 @@ export function initGame(httpServer) {
 
     // uczeń: dołączenie do pokoju
     socket.on('uczen:dolacz', ({ kod, uczenId }) => {
-      const p = pobierzPokoj(kod);
-      uczenId = Number(uczenId);
-      if (!p || p.status === 'finished') {
-        socket.emit('pokoj:blad', { error: 'Pokój nie istnieje lub został zamknięty.' });
-        return;
-      }
-      if (p.status !== 'lobby') {
-        socket.emit('pokoj:blad', { error: 'Gra w tym pokoju już się rozpoczęła.' });
-        return;
-      }
-      const uczen = db.prepare(
-        'SELECT id, klasa_id, numer_dziennika, imie_nazwisko, avatar_json FROM uczniowie WHERE id = ?'
-      ).get(uczenId);
-      if (!uczen || uczen.klasa_id !== p.klasaId) {
-        socket.emit('pokoj:blad', { error: 'Nie możesz dołączyć do tego pokoju.' });
-        return;
-      }
-
-      const stary = p.uczniowie.get(uczen.id);
-      if (stary && stary.socketId !== socket.id) {
-        try { io.sockets.sockets.get(stary.socketId)?.disconnect(true); } catch { /* stare */ }
-      }
-
-      dodajGracza(p, uczen, socket.id);
-
-      socket.join('pokoj:' + p.kod);
-      socket.data.pokojKod = p.kod;
-      socket.data.uczenId = uczen.id;
-
-      socket.emit('uczen:stan', {
-        pokoj: podsumowanie(p),
-        uczen: {
-          uczenId: uczen.id,
-          numerDziennika: uczen.numer_dziennika,
-          imieNazwisko: uczen.imie_nazwisko,
-          avatar: JSON.parse(uczen.avatar_json || '{}')
+      void (async () => {
+        const p = pobierzPokoj(kod);
+        uczenId = Number(uczenId);
+        if (!p || p.status === 'finished') {
+          socket.emit('pokoj:blad', { error: 'Pokój nie istnieje lub został zamknięty.' });
+          return;
         }
-      });
-      socket.emit('gra:stan', stanPubliczny(p));
-      io.to('pokoj:' + p.kod).emit('pokoj:uczniowie', {
-        uczniowie: listaUczniow(p).map(widokGracza)
-      });
+        if (p.status !== 'lobby') {
+          socket.emit('pokoj:blad', { error: 'Gra w tym pokoju już się rozpoczęła.' });
+          return;
+        }
+        const uczen = await db.get(
+          'SELECT id, klasa_id, numer_dziennika, imie_nazwisko, avatar_json FROM uczniowie WHERE id = ?',
+          uczenId
+        );
+        if (!uczen || uczen.klasa_id !== p.klasaId) {
+          socket.emit('pokoj:blad', { error: 'Nie możesz dołączyć do tego pokoju.' });
+          return;
+        }
+
+        const stary = p.uczniowie.get(uczen.id);
+        if (stary && stary.socketId !== socket.id) {
+          try { io.sockets.sockets.get(stary.socketId)?.disconnect(true); } catch { /* stare */ }
+        }
+
+        dodajGracza(p, uczen, socket.id);
+
+        socket.join('pokoj:' + p.kod);
+        socket.data.pokojKod = p.kod;
+        socket.data.uczenId = uczen.id;
+
+        socket.emit('uczen:stan', {
+          pokoj: podsumowanie(p),
+          uczen: {
+            uczenId: uczen.id,
+            numerDziennika: uczen.numer_dziennika,
+            imieNazwisko: uczen.imie_nazwisko,
+            avatar: JSON.parse(uczen.avatar_json || '{}')
+          }
+        });
+        socket.emit('gra:stan', stanPubliczny(p));
+        io.to('pokoj:' + p.kod).emit('pokoj:uczniowie', {
+          uczniowie: listaUczniow(p).map(widokGracza)
+        });
+      })().catch((err) => console.error('Błąd dołączania ucznia:', err));
     });
 
     // uczeń: sterowanie (wektor kierunku) — tylko 4pola

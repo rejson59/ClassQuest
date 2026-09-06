@@ -16,9 +16,9 @@ function losujKod() {
   return kod;
 }
 
-export function utworzPokoj({ teacherId, klasaId, zestawId, auto, tryb = '4pola', liczbaEkip = 2 }) {
-  const klasa = db.prepare('SELECT * FROM klasy WHERE id = ? AND teacher_id = ?').get(klasaId, teacherId);
-  const zestaw = db.prepare('SELECT * FROM zestawy_pytan WHERE id = ? AND teacher_id = ?').get(zestawId, teacherId);
+export async function utworzPokoj({ teacherId, klasaId, zestawId, auto, tryb = '4pola', liczbaEkip = 2 }) {
+  const klasa = await db.get('SELECT * FROM klasy WHERE id = ? AND teacher_id = ?', klasaId, teacherId);
+  const zestaw = await db.get('SELECT * FROM zestawy_pytan WHERE id = ? AND teacher_id = ?', zestawId, teacherId);
   if (!klasa || !zestaw) {
     const err = new Error('Nie znaleziono klasy lub zestawu pytań.');
     err.status = 400;
@@ -64,10 +64,11 @@ export function utworzPokoj({ teacherId, klasaId, zestawId, auto, tryb = '4pola'
 
   pokoje.set(kod, pokoj);
 
-  db.prepare(
+  await db.run(
     `INSERT INTO sesje (kod, teacher_id, klasa_id, zestaw_id, tryb, status, auto)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
-  ).run(kod, teacherId, klasa.id, zestaw.id, tryb, 'lobby', pokoj.auto ? 1 : 0);
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    kod, teacherId, klasa.id, zestaw.id, tryb, 'lobby', pokoj.auto ? 1 : 0
+  );
 
   return pokoj;
 }
@@ -133,18 +134,22 @@ export function onZamknieciePokoju(fn) {
   callbackZamkniecia = fn;
 }
 
-export function zakonczPokoj(kod) {
+export async function zakonczPokoj(kod) {
   const p = pokoje.get(String(kod));
   if (!p) return;
   pokoje.delete(String(kod));
-  db.prepare("UPDATE sesje SET status = 'finished', zakonczona_at = datetime('now') WHERE kod = ?").run(String(kod));
+  try {
+    await db.run("UPDATE sesje SET status = 'finished', zakonczona_at = datetime('now') WHERE kod = ?", String(kod));
+  } catch (err) {
+    console.error('Błąd przy zamykaniu pokoju (zapis sesji):', err);
+  }
   callbackZamkniecia?.(p.kod);
 }
 
 function posprzataj() {
   const teraz = Date.now();
   for (const [kod, p] of pokoje) {
-    if (teraz - p.utworzonyAt > CZAS_ZYCIA) zakonczPokoj(kod);
+    if (teraz - p.utworzonyAt > CZAS_ZYCIA) zakonczPokoj(kod).catch(() => {});
   }
 }
 setInterval(posprzataj, 10 * 60 * 1000).unref?.();
