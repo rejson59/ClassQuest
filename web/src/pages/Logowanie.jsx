@@ -20,13 +20,23 @@ export default function Logowanie() {
       .catch(() => setDemoDostepne(false));
   }, []);
 
+  async function wejdz() {
+    // Po udanym logowaniu sprawdzamy, czy sesja faktycznie działa.
+    // Jeśli nie (np. przeglądarka blokuje przechowywanie) — pokazujemy
+    // jasny komunikat zamiast cichego powrotu do formularza.
+    const ja = await apiGet('/auth/ja');
+    if (!ja?.teacher) throw new Error('Nie udało się potwierdzić sesji — spróbuj otworzyć podgląd w nowej karcie.');
+    navigate('/nauczyciel');
+  }
+
   async function submit(e) {
     e.preventDefault();
     setBusy(true);
+    setMsg({ text: '', type: 'error' });
     try {
       const url = rejestracja ? '/auth/rejestracja' : '/auth/logowanie';
       await apiPost(url, { imieNazwisko, email, haslo });
-      navigate('/nauczyciel');
+      await wejdz();
     } catch (err) {
       setMsg({ text: err.message, type: 'error' });
       setBusy(false);
@@ -35,9 +45,10 @@ export default function Logowanie() {
 
   async function demoLogin() {
     setBusy(true);
+    setMsg({ text: '', type: 'error' });
     try {
       await apiPost('/auth/logowanie', { email: 'nauczyciel@demo.pl', haslo: 'demo1234' });
-      navigate('/nauczyciel');
+      await wejdz();
     } catch (err) {
       setMsg({ text: err.message, type: 'error' });
       setBusy(false);

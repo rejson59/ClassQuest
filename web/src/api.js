@@ -1,16 +1,36 @@
 // Pomocnik do wywołań API.
 // Autoryzacja: token JWT wysyłany nagłówkiem Authorization (prócz cookie),
 // dzięki czemu sesja działa też tam, gdzie przeglądarka blokuje ciasteczka.
+// Token trzymamy w 3 miejscach (localStorage → sessionStorage → pamięć),
+// żeby logowanie działało nawet przy całkowicie zablokowanym przechowywaniu.
+
 const TOKEN_KEY = 'cq_token';
+let tokenWpamieci = ''; // awaryjne: wystarczy na czas sesji (bez przeładowania)
+
+function zapiszWszystkie(key, value) {
+  try { localStorage.setItem(key, value); } catch { /* zablokowane */ }
+  try { sessionStorage.setItem(key, value); } catch { /* zablokowane */ }
+}
+function usunWszystkie(key) {
+  try { localStorage.removeItem(key); } catch { /* zablokowane */ }
+  try { sessionStorage.removeItem(key); } catch { /* zablokowane */ }
+}
 
 export function getToken() {
-  try { return localStorage.getItem(TOKEN_KEY) || ''; } catch { return ''; }
-}
-function setToken(t) {
+  if (tokenWpamieci) return tokenWpamieci;
   try {
-    if (t) localStorage.setItem(TOKEN_KEY, t);
-    else localStorage.removeItem(TOKEN_KEY);
-  } catch { /* tryb bez localStorage — token zostaje tylko na czas sesji */ }
+    const t = localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || '';
+    if (t) tokenWpamieci = t;
+    return t;
+  } catch {
+    return tokenWpamieci;
+  }
+}
+
+function setToken(t) {
+  tokenWpamieci = t || '';
+  if (t) zapiszWszystkie(TOKEN_KEY, t);
+  else usunWszystkie(TOKEN_KEY);
 }
 
 async function api(path, options = {}) {
