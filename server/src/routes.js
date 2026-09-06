@@ -23,7 +23,10 @@ export function mountRoutes(app, db) {
   }
 
   async function auth(req, res, next) {
-    const token = req.cookies?.[COOKIE];
+    const authH = req.headers.authorization || '';
+    const token = authH.startsWith('Bearer ')
+      ? authH.slice(7).trim()
+      : req.cookies?.[COOKIE];
     if (!token) return res.status(401).json({ error: 'Brak sesji. Zaloguj się.' });
     try {
       const payload = jwt.verify(token, JWT_SECRET);
@@ -82,8 +85,9 @@ export function mountRoutes(app, db) {
     }
 
     const teacher = { id, imie_nazwisko: imieNazwisko, email, rola };
-    res.cookie(COOKIE, sign(teacher), { httpOnly: true, sameSite: 'lax', maxAge: 30 * 24 * 3600 * 1000 });
-    res.json({ teacher });
+    const token = sign(teacher);
+    res.cookie(COOKIE, token, { httpOnly: true, sameSite: 'lax', maxAge: 30 * 24 * 3600 * 1000 });
+    res.json({ teacher, token });
   }));
 
   app.post('/api/auth/logowanie', ah(async (req, res) => {
@@ -94,8 +98,9 @@ export function mountRoutes(app, db) {
       return res.status(401).json({ error: 'Nieprawidłowy e-mail lub hasło.' });
     }
     const teacher = { id: row.id, imie_nazwisko: row.imie_nazwisko, email: row.email, rola: row.rola || 'nauczyciel' };
-    res.cookie(COOKIE, sign(teacher), { httpOnly: true, sameSite: 'lax', maxAge: 30 * 24 * 3600 * 1000 });
-    res.json({ teacher });
+    const token = sign(teacher);
+    res.cookie(COOKIE, token, { httpOnly: true, sameSite: 'lax', maxAge: 30 * 24 * 3600 * 1000 });
+    res.json({ teacher, token });
   }));
 
   app.post('/api/auth/wyloguj', (_req, res) => {
@@ -104,6 +109,13 @@ export function mountRoutes(app, db) {
   });
 
   app.get('/api/auth/ja', auth, (req, res) => res.json({ teacher: req.teacher }));
+
+  // Czy konto demo istnieje? (tylko lokalna baza SQLite z seedem) — frontend
+  // pokazuje wtedy przycisk „Użyj demo". Na produkcji (Postgres) go ukrywa.
+  app.get('/api/demo', ah(async (_req, res) => {
+    const r = await db.get("SELECT COUNT(*) AS c FROM teachers WHERE email = 'nauczyciel@demo.pl'");
+    res.json({ dostepne: Number(r?.c ?? 0) > 0 });
+  }));
 
   // -------- KLASY ---------------------------------------------------------
   app.get('/api/klasy', auth, ah(async (req, res) => {

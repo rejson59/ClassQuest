@@ -1,7 +1,9 @@
-# ClassQuest — Schemat bazy danych (SQLite)
+# ClassQuest — Schemat bazy danych
 
-Plik bazy: `server/data/classquest.db` (tworzony automatycznie przy starcie).
-Struktura odpowiada koncepcji z prototypu (Supabase), ale jest uproszczona i działa lokalnie.
+Serwer działa na dwóch silnikach: lokalnym **SQLite** (`server/data/classquest.db`,
+tworzony automatycznie przy starcie, z danymi demo) albo **PostgreSQL/Supabase**
+(gdy ustawiona zmienna `DATABASE_URL`; tabele też tworzą się same — wzorzec schematu
+znajduje się w `supabase/schema.sql`). Poniżej opis tabel — wspólny dla obu silników.
 
 ## Tabele
 

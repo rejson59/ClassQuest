@@ -63,6 +63,8 @@ export function initGame(httpServer) {
 
   function teacherIdZeSocketa(socket) {
     try {
+      const authToken = socket.handshake?.auth?.token;
+      if (authToken) return jwt.verify(String(authToken), JWT_SECRET).id ?? null;
       const cookie = socket.handshake.headers.cookie || '';
       const m = cookie.match(/(?:^|;\s*)cq_token=([^;]+)/);
       if (!m) return null;

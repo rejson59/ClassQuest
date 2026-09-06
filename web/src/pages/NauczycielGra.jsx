@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
-import { apiDelete } from '../api.js';
+import { apiDelete, getToken } from '../api.js';
 import { useCurrentTeacher } from '../hooks.jsx';
 import Plansza from '../components/Plansza.jsx';
 import Wiezowiec from '../components/Wiezowiec.jsx';
@@ -31,7 +31,7 @@ export default function NauczycielGra() {
   useEffect(() => {
     if (loading || !teacher) return;
 
-    const socket = io({ autoConnect: false });
+    const socket = io({ autoConnect: false, auth: { token: getToken() } });
     socketRef.current = socket;
 
     socket.on('connect', () => socket.emit('nauczyciel:pokoj', { kod }));

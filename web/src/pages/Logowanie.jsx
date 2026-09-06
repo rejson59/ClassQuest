@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { apiPost } from '../api.js';
+import { apiGet, apiPost } from '../api.js';
 import ThemeToggle from '../components/ThemeToggle.jsx';
 import Msg from '../components/Msg.jsx';
 
@@ -12,6 +12,13 @@ export default function Logowanie() {
   const [haslo, setHaslo] = useState('');
   const [msg, setMsg] = useState({ text: '', type: 'error' });
   const [busy, setBusy] = useState(false);
+  const [demoDostepne, setDemoDostepne] = useState(false);
+
+  useEffect(() => {
+    apiGet('/demo')
+      .then((d) => setDemoDostepne(!!d.dostepne))
+      .catch(() => setDemoDostepne(false));
+  }, []);
 
   async function submit(e) {
     e.preventDefault();
@@ -81,13 +88,17 @@ export default function Logowanie() {
             </button>
           </div>
 
-          <hr className="sep" />
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <span className="muted" style={{ fontSize: '0.8rem', fontWeight: 600 }}>
-              Konto demo: <b>nauczyciel@demo.pl</b> / <b>demo1234</b>
-            </span>
-            <button className="neu-btn neu-btn-sm neu-btn-blue" onClick={demoLogin} disabled={busy}>Użyj demo ✨</button>
-          </div>
+          {demoDostepne && (
+            <>
+              <hr className="sep" />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <span className="muted" style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                  Konto demo: <b>nauczyciel@demo.pl</b> / <b>demo1234</b>
+                </span>
+                <button type="button" className="neu-btn neu-btn-sm neu-btn-blue" onClick={demoLogin} disabled={busy}>Użyj demo ✨</button>
+              </div>
+            </>
+          )}
 
           <div style={{ marginTop: 18, textAlign: 'center' }}>
             <Link to="/" className="link-btn muted">← Wróć na start</Link>
