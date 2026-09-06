@@ -184,9 +184,14 @@ const INS_WITH_ID = /^\s*insert\s+into\s+(teachers|klasy|uczniowie|zestawy_pytan
 async function utworzPg() {
   const { default: pg } = await import('pg');
   const { Pool } = pg;
+  const url = process.env.DATABASE_URL;
+  // Supabase wymaga SSL; lokalny Postgres (testy) — nie.
+  const ssl = /(sslmode=require|supabase\.co|pooler\.supabase\.com)/i.test(url || '')
+    ? { rejectUnauthorized: false }
+    : undefined;
   const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
+    connectionString: url,
+    ...(ssl ? { ssl } : {}),
     max: 5
   });
 

@@ -16,6 +16,7 @@
     "start": "NODE_ENV=production node server/src/index.js"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "socket.io-client": "^4.8.3"
   }
 }

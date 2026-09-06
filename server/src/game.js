@@ -530,7 +530,7 @@ export function initGame(httpServer) {
 
   io.on('connection', (socket) => {
     // nauczyciel: wejście do pokoju
-    socket.on('nauczyciel:pokoj', ({ kod }) => {
+    socket.on('nauczyciel:pokoj', ({ kod } = {}) => {
       const p = pobierzPokoj(kod);
       const tid = teacherIdZeSocketa(socket);
       if (!p || !tid || p.teacherId !== tid) {
@@ -548,29 +548,29 @@ export function initGame(httpServer) {
     });
 
     // nauczyciel: sterowanie grą
-    socket.on('nauczyciel:start', ({ kod }) => {
+    socket.on('nauczyciel:start', ({ kod } = {}) => {
       const p = pobierzPokoj(kod);
       const tid = teacherIdZeSocketa(socket);
       if (p && tid && p.teacherId === tid) startGry(p);
     });
-    socket.on('nauczyciel:koniecRundy', ({ kod }) => {
+    socket.on('nauczyciel:koniecRundy', ({ kod } = {}) => {
       const p = pobierzPokoj(kod);
       const tid = teacherIdZeSocketa(socket);
       if (p && tid && p.teacherId === tid) przejdzDoWyniku(p);
     });
-    socket.on('nauczyciel:nastepne', ({ kod }) => {
+    socket.on('nauczyciel:nastepne', ({ kod } = {}) => {
       const p = pobierzPokoj(kod);
       const tid = teacherIdZeSocketa(socket);
       if (p && tid && p.teacherId === tid) nastepnePytanie(p);
     });
-    socket.on('nauczyciel:zakoncz', ({ kod }) => {
+    socket.on('nauczyciel:zakoncz', ({ kod } = {}) => {
       const p = pobierzPokoj(kod);
       const tid = teacherIdZeSocketa(socket);
       if (p && tid && p.teacherId === tid) zakonczGre(p);
     });
 
     // uczeń: dołączenie do pokoju
-    socket.on('uczen:dolacz', ({ kod, uczenId }) => {
+    socket.on('uczen:dolacz', ({ kod, uczenId } = {}) => {
       void (async () => {
         const p = pobierzPokoj(kod);
         uczenId = Number(uczenId);
@@ -619,7 +619,7 @@ export function initGame(httpServer) {
     });
 
     // uczeń: sterowanie (wektor kierunku) — tylko 4pola
-    socket.on('steruj', ({ dx, dy }) => {
+    socket.on('steruj', ({ dx, dy } = {}) => {
       const p = socket.data.pokojKod ? pobierzPokoj(socket.data.pokojKod) : null;
       if (!p || p.tryb !== '4pola') return;
       const g = p.uczniowie.get(socket.data.uczenId);
@@ -629,7 +629,7 @@ export function initGame(httpServer) {
     });
 
     // uczeń: odpowiedź w trybie budowlańców (szybki quiz)
-    socket.on('odpowiedz', ({ odp }) => {
+    socket.on('odpowiedz', ({ odp } = {}) => {
       const p = socket.data.pokojKod ? pobierzPokoj(socket.data.pokojKod) : null;
       if (!p || p.tryb !== 'budowlanci' || p.faza !== 'pytanie' || !p.obecne) return;
       const g = p.uczniowie.get(socket.data.uczenId);
@@ -648,7 +648,7 @@ export function initGame(httpServer) {
     });
 
     // uczeń: użycie karty (budowlańcy)
-    socket.on('karta', ({ typ, cel }) => {
+    socket.on('karta', ({ typ, cel } = {}) => {
       const p = socket.data.pokojKod ? pobierzPokoj(socket.data.pokojKod) : null;
       if (!p || p.tryb !== 'budowlanci') return;
       const g = p.uczniowie.get(socket.data.uczenId);

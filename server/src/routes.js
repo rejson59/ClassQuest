@@ -107,14 +107,14 @@ export function mountRoutes(app, db) {
 
   // -------- KLASY ---------------------------------------------------------
   app.get('/api/klasy', auth, ah(async (req, res) => {
-    const klasy = await db.all(`
+    const rows = await db.all(`
       SELECT k.*, COUNT(u.id) AS liczba_uczniow
       FROM klasy k
       LEFT JOIN uczniowie u ON u.klasa_id = k.id
       WHERE k.teacher_id = ?
       GROUP BY k.id ORDER BY k.created_at DESC
     `, req.teacher.id);
-    res.json({ klasy });
+    res.json({ klasy: rows.map((k) => ({ ...k, liczba_uczniow: Number(k.liczba_uczniow) })) });
   }));
 
   app.post('/api/klasy', auth, ah(async (req, res) => {
@@ -144,12 +144,12 @@ export function mountRoutes(app, db) {
   app.get('/api/klasy/:id/uczniowie', auth, ah(async (req, res) => {
     const klasa = await ownedClass(req.teacher.id, req.params.id);
     if (!klasa) return res.status(404).json({ error: 'Nie znaleziono klasy.' });
-    const uczniowie = await db.all(`
+    const rows = await db.all(`
       SELECT id, klasa_id, numer_dziennika, imie_nazwisko, avatar_json, xp,
              (SELECT COUNT(*) FROM xp_logi x WHERE x.uczen_id = u.id) AS logow
       FROM uczniowie u WHERE klasa_id = ? ORDER BY numer_dziennika ASC
     `, klasa.id);
-    res.json({ uczniowie, klasa });
+    res.json({ uczniowie: rows.map((u) => ({ ...u, logow: Number(u.logow) })), klasa });
   }));
 
   app.post('/api/klasy/:id/uczniowie', auth, ah(async (req, res) => {
@@ -237,14 +237,14 @@ export function mountRoutes(app, db) {
 
   // -------- ZESTAWY PYTAŃ --------------------------------------------------
   app.get('/api/zestawy', auth, ah(async (req, res) => {
-    const zestawy = await db.all(`
+    const rows = await db.all(`
       SELECT z.*, COUNT(p.id) AS liczba_pytan
       FROM zestawy_pytan z
       LEFT JOIN pytania p ON p.zestaw_id = z.id
       WHERE z.teacher_id = ?
       GROUP BY z.id ORDER BY z.created_at DESC
     `, req.teacher.id);
-    res.json({ zestawy });
+    res.json({ zestawy: rows.map((z) => ({ ...z, liczba_pytan: Number(z.liczba_pytan) })) });
   }));
 
   app.post('/api/zestawy', auth, ah(async (req, res) => {
@@ -459,7 +459,7 @@ export function mountRoutes(app, db) {
   }));
 
   app.get('/api/admin/nauczyciele', auth, adminOnly, ah(async (_req, res) => {
-    const nauczyciele = await db.all(`
+    const rows = await db.all(`
       SELECT t.id, t.imie_nazwisko, t.email, t.rola, t.created_at,
         (SELECT COUNT(*) FROM klasy k WHERE k.teacher_id = t.id) AS klasy,
         (SELECT COUNT(*) FROM uczniowie u JOIN klasy k ON u.klasa_id = k.id
@@ -472,7 +472,18 @@ export function mountRoutes(app, db) {
         (SELECT COUNT(*) FROM sesje s WHERE s.teacher_id = t.id) AS sesje
       FROM teachers t ORDER BY t.id ASC
     `);
-    res.json({ nauczyciele });
+    res.json({
+      nauczyciele: rows.map((t) => ({
+        ...t,
+        id: Number(t.id),
+        klasy: Number(t.klasy),
+        uczniowie: Number(t.uczniowie),
+        zestawy: Number(t.zestawy),
+        pytania: Number(t.pytania),
+        suma_xp: Number(t.suma_xp),
+        sesje: Number(t.sesje)
+      }))
+    });
   }));
 
   app.patch('/api/admin/nauczyciele/:id/rola', auth, adminOnly, ah(async (req, res) => {
@@ -526,7 +537,7 @@ export function mountRoutes(app, db) {
       ORDER BY s.utworzona_at DESC
       LIMIT ?
     `, limit);
-    res.json({ sesje });
+    res.json({ sesje: sesje.map((s) => ({ ...s, wynikow: Number(s.wynikow) })) });
   }));
 
   app.get('/api/admin/sesje/:kod/wyniki', auth, adminOnly, ah(async (req, res) => {
