@@ -43,6 +43,25 @@ export default function Logowanie() {
     }
   }
 
+  async function demoLogin() {
+    setBusy(true);
+    setMsg({ text: '', type: 'error' });
+    try {
+      await apiPost('/auth/logowanie', { email: 'nauczyciel@demo.pl', haslo: 'demo1234' });
+      await apiGet('/auth/ja'); // weryfikacja, czy sesja faktycznie działa
+      navigate('/nauczyciel');
+    } catch (err) {
+      const blokada = err.status === 401 || /brak sesji/i.test(err.message || '');
+      setMsg({
+        text: blokada
+          ? 'Osadzony podgląd blokuje zapamiętanie sesji. Kliknij „Otwórz demo w nowej karcie" poniżej — tam na pewno zadziała.'
+          : err.message,
+        type: 'error'
+      });
+      setBusy(false);
+    }
+  }
+
   const subtitle = rejestracja ? 'Nowe konto nauczyciela' : 'Panel nauczyciela';
 
   return (
@@ -90,15 +109,23 @@ export default function Logowanie() {
           {demoDostepne && (
             <>
               <hr className="sep" />
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                <span className="muted" style={{ fontSize: '0.8rem', fontWeight: 600 }}>
-                  Konto demo: <b>nauczyciel@demo.pl</b> / <b>demo1234</b>
-                </span>
-                <a className="neu-btn neu-btn-sm neu-btn-blue" style={{ textDecoration: 'none', display: 'inline-block' }} href="/api/auth/demo">Użyj demo ✨</a>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                  <span className="muted" style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                    Konto demo: <b>nauczyciel@demo.pl</b> / <b>demo1234</b>
+                  </span>
+                  <button type="button" className="neu-btn neu-btn-sm neu-btn-blue" onClick={demoLogin} disabled={busy}>
+                    {busy ? 'Loguję…' : 'Użyj demo ✨'}
+                  </button>
+                </div>
+                <a className="neu-btn neu-btn-sm neu-btn-block" target="_blank" rel="noopener noreferrer"
+                   href="/api/auth/demo" style={{ textDecoration: 'none' }}>
+                  Otwórz demo w nowej karcie ⧉
+                </a>
+                <p className="muted" style={{ fontSize: '0.75rem', fontWeight: 600, textAlign: 'center' }}>
+                  Jeżeli „Użyj demo" nie działa w osadzonym podglądzie, kliknij powyższy przycisk — otworzy się zwykła karta, gdzie sesja na pewno się zapisze.
+                </p>
               </div>
-              <p className="muted" style={{ fontSize: '0.75rem', fontWeight: 600, marginTop: 10, textAlign: 'center' }}>
-                Jeśli przycisk nie działa w osadzonym podglądzie — otwórz aplikację w nowej karcie (ikona ⧉ przy podglądzie).
-              </p>
             </>
           )}
 
