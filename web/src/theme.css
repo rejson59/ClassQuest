@@ -1,0 +1,219 @@
+/* ============ ClassQuest — neomorficzny design system ============ */
+
+:root {
+  --bg: #e6ecf5;
+  --card-bg: #e6ecf5;
+  --text-main: #2d3748;
+  --text-muted: #718096;
+  --blue-main: #2563eb;
+  --blue-glow: rgba(37, 99, 235, 0.45);
+  --green-main: #10b981;
+  --red-main: #ef4444;
+  --amber-main: #f59e0b;
+  --shadow-dark: rgba(166, 180, 200, 0.7);
+  --shadow-light: #ffffff;
+  --ok-bg: rgba(16, 185, 129, 0.12);
+  --err-bg: rgba(239, 68, 68, 0.1);
+}
+
+[data-theme="dark"] {
+  --bg: #1e232a;
+  --card-bg: #1e232a;
+  --text-main: #e2e8f0;
+  --text-muted: #64748b;
+  --blue-main: #3b82f6;
+  --blue-glow: rgba(59, 130, 246, 0.5);
+  --green-main: #10b981;
+  --red-main: #f87171;
+  --amber-main: #f59e0b;
+  --shadow-dark: rgba(10, 13, 17, 0.85);
+  --shadow-light: rgba(45, 53, 64, 0.5);
+  --ok-bg: rgba(16, 185, 129, 0.2);
+  --err-bg: rgba(239, 68, 68, 0.2);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+html, body, #root { min-height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text-main);
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+button { font-family: inherit; }
+
+/* ---- Karty ---- */
+.neu-card {
+  background: var(--card-bg);
+  border-radius: 28px;
+  padding: 28px;
+  box-shadow: 12px 12px 24px var(--shadow-dark), -12px -12px 24px var(--shadow-light);
+}
+
+.neu-card-sm { border-radius: 20px; padding: 18px 20px; }
+
+/* ---- Przyciski ---- */
+.neu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 18px;
+  background: var(--card-bg);
+  color: var(--text-main);
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+  transition: transform 0.15s ease, box-shadow 0.2s ease, color 0.2s ease;
+  user-select: none;
+  text-decoration: none;
+}
+.neu-btn:hover { color: var(--blue-main); transform: translateY(-2px); }
+.neu-btn:active { transform: translateY(1px); box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light); }
+.neu-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+.neu-btn-block { width: 100%; }
+.neu-btn-blue { color: var(--blue-main); }
+.neu-btn-green { color: var(--green-main); }
+.neu-btn-red { color: var(--red-main); }
+.neu-btn-red:hover { color: var(--red-main); }
+.neu-btn-sm { padding: 8px 14px; border-radius: 14px; font-size: 0.85rem; }
+.neu-btn-icon { width: 46px; height: 46px; padding: 0; border-radius: 16px; font-size: 1.1rem; }
+
+/* ---- Inputy ---- */
+.neu-input, .neu-select, .neu-textarea {
+  width: 100%;
+  padding: 13px 16px;
+  border-radius: 16px;
+  border: 1px solid transparent;
+  outline: none;
+  background: var(--card-bg);
+  color: var(--text-main);
+  font-weight: 600;
+  font-size: 0.95rem;
+  box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+  transition: all 0.25s ease;
+}
+.neu-input:focus, .neu-select:focus, .neu-textarea:focus {
+  border-color: var(--blue-main);
+  box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light), 0 0 12px var(--blue-glow);
+}
+.neu-input::placeholder, .neu-textarea::placeholder { color: var(--text-muted); }
+.neu-label { display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin: 0 0 6px 4px; }
+.field { margin-bottom: 14px; }
+
+/* ---- Komunikaty ---- */
+.msg { display: none; padding: 12px 16px; border-radius: 14px; font-size: 0.87rem; font-weight: 600; margin-bottom: 16px; }
+.msg.show { display: block; }
+.msg-error { background: var(--err-bg); color: var(--red-main); }
+.msg-ok { background: var(--ok-bg); color: var(--green-main); }
+
+/* ---- Listy / wiersze ---- */
+.row-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: var(--card-bg);
+  box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.row-main { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.row-title { font-weight: 700; font-size: 1rem; }
+.row-sub { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+.row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.badge {
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  background: var(--card-bg);
+  color: var(--blue-main);
+  box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+  white-space: nowrap;
+}
+.badge-green { color: var(--green-main); }
+.badge-amber { color: var(--amber-main); }
+
+/* ---- Nagłówki stron ---- */
+.page { max-width: 1080px; margin: 0 auto; padding: 24px 16px 60px; }
+.page-title { font-size: 1.7rem; font-weight: 800; margin-bottom: 4px; }
+.page-sub { color: var(--text-muted); font-weight: 600; font-size: 0.92rem; margin-bottom: 22px; }
+.section-title { font-size: 1.15rem; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+.muted { color: var(--text-muted); }
+.empty-state { text-align: center; color: var(--text-muted); font-weight: 600; padding: 26px; }
+
+/* ---- Animacja liter ---- */
+.char { display: inline-block; opacity: 0; transform: translateY(18px); animation: letterJump 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+@keyframes letterJump { 60% { transform: translateY(-6px); } 100% { opacity: 1; transform: translateY(0); } }
+
+/* ---- Modal ---- */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(30, 35, 42, 0.45); z-index: 200;
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.modal {
+  background: var(--card-bg); border-radius: 24px; padding: 26px; width: 100%; max-width: 520px;
+  box-shadow: 12px 12px 30px rgba(0,0,0,0.25);
+  max-height: 88vh; overflow-y: auto;
+}
+.modal-title { font-weight: 800; font-size: 1.15rem; margin-bottom: 16px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-1-2 { display: grid; grid-template-columns: 1fr 1.6fr; gap: 24px; align-items: start; }
+@media (max-width: 860px) { .grid-2, .grid-1-2 { grid-template-columns: 1fr; } }
+
+.topbar {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  flex-wrap: wrap; padding: 14px 20px;
+}
+.topbar-links { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.topbar .logo { font-weight: 800; font-size: 1.25rem; }
+
+.link-btn { background: none; border: none; color: var(--text-main); cursor: pointer; font-weight: 700; font-size: 0.9rem; padding: 8px 12px; border-radius: 12px; }
+.link-btn:hover { color: var(--blue-main); }
+.link-btn.active { color: var(--blue-main); }
+
+.center-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.auth-card { width: 100%; max-width: 460px; }
+
+.fade-in { opacity: 0; transform: translate(-20px, -20px) scale(0.97); animation: cardAppear 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+@keyframes cardAppear { to { opacity: 1; transform: translate(0,0) scale(1); } }
+
+hr.sep { border: none; height: 2px; margin: 18px 0; border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--shadow-dark), transparent); opacity: 0.5; }
+
+/* ---- Plansza 2D ---- */
+.plansza-podloga {
+  background-color: var(--plansza-tlo);
+  background-image:
+    linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px),
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,0.18), transparent 55%);
+  background-size: 120px 120px, 120px 120px, 100% 100%;
+}
+.plansza-sciany {
+  border: 45px solid var(--plansza-sciana);
+  border-radius: 36px;
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.25);
+}
+:root {
+  --plansza-tlo: #d3dfef;
+  --plansza-sciana: #a9bccf;
+}
+[data-theme="dark"] {
+  --plansza-tlo: #2a3342;
+  --plansza-sciana: #171d27;
+}
+
+/* ---- animacje wspólne (tryb „Szaleni budowlańcy") ---- */
+@keyframes skok { 0% { transform: scale(1); } 40% { transform: scale(1.06); } 100% { transform: scale(1); } }
+@keyframes pietroWskakuje { 0% { transform: scaleY(0); opacity: 0; } 100% { transform: scaleY(1); opacity: 1; } }

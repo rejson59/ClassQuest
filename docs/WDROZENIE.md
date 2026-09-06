@@ -5,6 +5,13 @@
 > Baza docelowa: **Supabase free** (założenie z ustaleń; alternatywa: Neon free).
 > Ten dokument to plan — **nie wdrażamy go, dopóki właściciel nie zatwierdzi wariantu.**
 
+> 📋 **Instrukcja krok po kroku dla właściciela (po ludzku, do czytania z telefonu):
+> [`WDROZENIE-KROK-PO-KROKU.md`](WDROZENIE-KROK-PO-KROKU.md)**
+
+> ✅ Wrzesień 2026: właściciel zaufał planowi → przygotowano wdrożenie „pod klucz"
+> (katalog `supabase/`, `render.yaml`, `.nvmrc`, `/health`, `JWT_SECRET` z env).
+> W toku: migracja kodu SQLite → PostgreSQL. Konta użytkownika: Runda 1 (Supabase) i Runda 2 (Koyeb/Render) wg instrukcji.
+
 ---
 
 ## 1. Weryfikacja rynku — wrzesień 2026 (sprawdzone na żywo)

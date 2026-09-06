@@ -1,0 +1,19 @@
+# ClassQuest — konfiguracja wdrożenia na Render (darmowy plan).
+# Uwaga: jeśli Koyeb poprosi Cię o kartę, wchodzi Render — ten plik właśnie po to.
+# Po podpięciu repo Render sam wykryje tę konfigurację (Blueprints → New Blueprint Instance).
+services:
+  - type: web
+    name: classquest
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Wartości wpiszesz w oknie, które Render pokaże przy tworzeniu usługi:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false

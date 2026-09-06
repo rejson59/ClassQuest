@@ -1,0 +1,21 @@
+{
+  "name": "classquest",
+  "private": true,
+  "version": "2.0.0",
+  "description": "ClassQuest — interaktywna platforma lekcyjna (gra 2D na żywo)",
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n SERVER,WEB -c blue,magenta \"npm run dev -w server\" \"npm run dev -w web\"",
+    "build": "npm run build -w web",
+    "start": "NODE_ENV=production node server/src/index.js"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
