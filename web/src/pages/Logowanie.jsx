@@ -43,18 +43,6 @@ export default function Logowanie() {
     }
   }
 
-  async function demoLogin() {
-    setBusy(true);
-    setMsg({ text: '', type: 'error' });
-    try {
-      await apiPost('/auth/logowanie', { email: 'nauczyciel@demo.pl', haslo: 'demo1234' });
-      await wejdz();
-    } catch (err) {
-      setMsg({ text: err.message, type: 'error' });
-      setBusy(false);
-    }
-  }
-
   const subtitle = rejestracja ? 'Nowe konto nauczyciela' : 'Panel nauczyciela';
 
   return (
@@ -106,8 +94,11 @@ export default function Logowanie() {
                 <span className="muted" style={{ fontSize: '0.8rem', fontWeight: 600 }}>
                   Konto demo: <b>nauczyciel@demo.pl</b> / <b>demo1234</b>
                 </span>
-                <button type="button" className="neu-btn neu-btn-sm neu-btn-blue" onClick={demoLogin} disabled={busy}>Użyj demo ✨</button>
+                <a className="neu-btn neu-btn-sm neu-btn-blue" style={{ textDecoration: 'none', display: 'inline-block' }} href="/api/auth/demo">Użyj demo ✨</a>
               </div>
+              <p className="muted" style={{ fontSize: '0.75rem', fontWeight: 600, marginTop: 10, textAlign: 'center' }}>
+                Jeśli przycisk nie działa w osadzonym podglądzie — otwórz aplikację w nowej karcie (ikona ⧉ przy podglądzie).
+              </p>
             </>
           )}
 

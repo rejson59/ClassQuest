@@ -117,6 +117,18 @@ export function mountRoutes(app, db) {
     res.json({ dostepne: Number(r?.c ?? 0) > 0 });
   }));
 
+  // Logowanie demo przez zwykłe przejście na adres (działa też w osadzonym
+  // podglądzie, gdzie przeglądarka blokuje zapis sesji przy fetch): serwer
+  // ustawia ciasteczko i przekierowuje do panelu.
+  app.get('/api/auth/demo', ah(async (_req, res) => {
+    const row = await db.get("SELECT * FROM teachers WHERE email = 'nauczyciel@demo.pl'");
+    if (!row) return res.status(404).json({ error: 'Konto demo nie istnieje.' });
+    const teacher = { id: row.id, imie_nazwisko: row.imie_nazwisko, email: row.email, rola: row.rola || 'nauczyciel' };
+    const token = sign(teacher);
+    res.cookie(COOKIE, token, { httpOnly: true, sameSite: 'lax', maxAge: 30 * 24 * 3600 * 1000 });
+    res.redirect('/nauczyciel');
+  }));
+
   // -------- KLASY ---------------------------------------------------------
   app.get('/api/klasy', auth, ah(async (req, res) => {
     const rows = await db.all(`
