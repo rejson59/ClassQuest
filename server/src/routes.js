@@ -119,14 +119,17 @@ export function mountRoutes(app, db) {
 
   // Logowanie demo przez zwykłe przejście na adres (działa też w osadzonym
   // podglądzie, gdzie przeglądarka blokuje zapis sesji przy fetch): serwer
-  // ustawia ciasteczko i przekierowuje do panelu.
+  // ustawia ciasteczko i przekierowuje do panelu. Token dorzucamy też do
+  // fragmentu adresu (#cq=...) — frontend odczyta go przy starcie i zaloguje
+  // się nagłówkiem, więc demo działa nawet po pełnym przeładowaniu w ramce
+  // (fragment nigdy nie opuszcza przeglądarki; dotyczy wyłącznie konta demo).
   app.get('/api/auth/demo', ah(async (_req, res) => {
     const row = await db.get("SELECT * FROM teachers WHERE email = 'nauczyciel@demo.pl'");
     if (!row) return res.status(404).json({ error: 'Konto demo nie istnieje.' });
     const teacher = { id: row.id, imie_nazwisko: row.imie_nazwisko, email: row.email, rola: row.rola || 'nauczyciel' };
     const token = sign(teacher);
     res.cookie(COOKIE, token, { httpOnly: true, sameSite: 'lax', maxAge: 30 * 24 * 3600 * 1000 });
-    res.redirect('/nauczyciel');
+    res.redirect('/nauczyciel#cq=' + encodeURIComponent(token));
   }));
 
   // -------- KLASY ---------------------------------------------------------

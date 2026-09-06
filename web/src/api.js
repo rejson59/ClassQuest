@@ -33,6 +33,20 @@ function setToken(t) {
   else usunWszystkie(TOKEN_KEY);
 }
 
+// Awaryjne logowanie demo: serwer przekierowuje na /nauczyciel#cq=<token>.
+// Odczytujemy token z adresu przy starcie — działa nawet, gdy przeglądarka
+// blokuje ciasteczka i całe przechowywanie (osadzony podgląd), i przetrwa
+// pełne przeładowanie strony. Fragment zaraz po odczycie usuwamy z adresu.
+(function przechwycTokenZAdresu() {
+  try {
+    const m = window.location.hash.match(/[#&]cq=([^&]+)/);
+    if (m && m[1]) {
+      setToken(decodeURIComponent(m[1]));
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+  } catch { /* brak window (testy) */ }
+})();
+
 async function api(path, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
   const token = getToken();
