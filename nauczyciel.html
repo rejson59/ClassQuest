@@ -3,504 +3,458 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ClassQuest - Panel Nauczyciela</title>
+  <title>Panel nauczyciela — ClassQuest</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
-  
+  <link rel="stylesheet" href="assets/css/base.css">
   <style>
-    /* Zmienne dla motywu jasnego (Light Mode) */
-    :root {
-      --bg: #e6ecf5;
-      --text-main: #4a5568;
-      --text-muted: #8c9ba5;
-      --blue-main: #2563eb;
-      --blue-glow: rgba(37, 99, 235, 0.45);
-      --green-main: #10b981;
-      --green-glow: rgba(16, 185, 129, 0.45);
-      --red-main: #ef4444;
-      --shadow-dark: rgba(166, 180, 200, 0.7);
-      --shadow-light: #ffffff;
-      --card-bg: #e6ecf5;
-    }
-
-    /* Zmienne dla motywu ciemnego (Dark Mode) */
-    [data-theme="dark"] {
-      --bg: #1e232a;
-      --text-main: #e2e8f0;
-      --text-muted: #64748b;
-      --blue-main: #3b82f6;
-      --blue-glow: rgba(59, 130, 246, 0.5);
-      --green-main: #10b981;
-      --green-glow: rgba(16, 185, 129, 0.5);
-      --red-main: #f87171;
-      --shadow-dark: rgba(15, 18, 22, 0.8);
-      --shadow-light: rgba(45, 53, 64, 0.5);
-      --card-bg: #1e232a;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      transition: background-color 0.4s ease, color 0.4s ease, box-shadow 0.3s ease;
-    }
-
-    body {
-      background-color: var(--bg);
-      color: var(--text-main);
-      min-height: 100vh;
-      padding: 30px 20px;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 32px;
-    }
-
-    /* Karta Neumorficzna */
-    .neu-card {
-      background: var(--card-bg);
-      border-radius: 28px;
-      padding: 32px;
-      box-shadow: 
-        16px 16px 32px var(--shadow-dark),
-        -16px -16px 32px var(--shadow-light);
-    }
-
-    /* Top Bar Header */
-    .header-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-
-    .logo {
-      font-size: 2.2rem;
-      font-weight: 800;
-      color: var(--text-main);
-    }
-
-    .subtitle {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      font-weight: 600;
-    }
-
-    .char {
-      display: inline-block;
-      opacity: 0;
-      transform: translateY(18px);
-      animation: letterJump 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    }
-
-    @keyframes letterJump {
-      60% { transform: translateY(-6px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    /* Przyciski Neumorficzne */
-    .neu-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 12px 20px;
-      border-radius: 18px;
-      background: var(--card-bg);
-      color: var(--text-main);
-      font-weight: 700;
-      font-size: 0.95rem;
-      border: none;
-      cursor: pointer;
-      outline: none;
-      box-shadow: 
-        6px 6px 14px var(--shadow-dark),
-        -6px -6px 14px var(--shadow-light);
-      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, color 0.2s ease;
-      user-select: none;
-    }
-
-    .neu-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 
-        10px 10px 20px var(--shadow-dark),
-        -10px -10px 20px var(--shadow-light);
-      color: var(--blue-main);
-    }
-
-    .neu-btn:active {
-      transform: translateY(1px);
-      box-shadow: 
-        inset 3px 3px 6px var(--shadow-dark),
-        inset -3px -3px 6px var(--shadow-light);
-    }
-
-    .neu-btn-danger:hover {
-      color: var(--red-main);
-    }
-
-    .neu-btn-square {
-      width: 48px;
-      height: 48px;
-      padding: 0;
-      border-radius: 16px;
-    }
-
-    /* Układ Siatki */
-    .grid-layout {
-      display: grid;
-      grid-template-columns: 1fr 1.8fr;
-      gap: 32px;
-    }
-
-    @media (max-width: 900px) {
-      .grid-layout {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* Sekcje */
-    .section-title {
-      font-size: 1.25rem;
-      font-weight: 800;
-      margin-bottom: 20px;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    /* Inputy i Formularze */
-    .neu-input-wrapper {
-      margin-bottom: 16px;
-    }
-
-    .neu-label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-      margin-left: 4px;
-    }
-
-    .neu-input, .neu-select {
-      width: 100%;
-      padding: 14px 18px;
-      border-radius: 16px;
-      border: 1px solid transparent;
-      outline: none;
-      background: var(--card-bg);
-      color: var(--text-main);
-      font-weight: 600;
-      font-size: 0.95rem;
-      box-shadow: 
-        inset 4px 4px 8px var(--shadow-dark),
-        inset -4px -4px 8px var(--shadow-light);
-      transition: all 0.3s ease;
-    }
-
-    .neu-input:focus, .neu-select:focus {
-      border-color: var(--blue-main);
-      box-shadow: 
-        inset 5px 5px 10px var(--shadow-dark),
-        inset -5px -5px 10px var(--shadow-light),
-        0 0 10px var(--blue-glow);
-    }
-
-    /* Listy i Elementy */
-    .student-list, .requests-list {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .list-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 20px;
-      border-radius: 20px;
-      background: var(--card-bg);
-      box-shadow: 
-        6px 6px 14px var(--shadow-dark),
-        -6px -6px 14px var(--shadow-light);
-    }
-
-    .student-info {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .student-name {
-      font-weight: 700;
-      font-size: 1.05rem;
-    }
-
-    .student-stats {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    .badge {
-      padding: 4px 10px;
-      border-radius: 10px;
-      font-size: 0.8rem;
-      font-weight: 800;
-      background: var(--card-bg);
-      color: var(--blue-main);
-      box-shadow: 
-        inset 2px 2px 4px var(--shadow-dark),
-        inset -2px -2px 4px var(--shadow-light);
-    }
-
-    .empty-state {
-      text-align: center;
-      color: var(--text-muted);
-      font-weight: 600;
-      padding: 24px;
-    }
+    .setup-form { display: grid; gap: 12px; }
+    .code-box { text-align: center; padding: 20px 14px; border-radius: 22px; background: linear-gradient(145deg, #4287f5, #1d4ed8); color: #fff; box-shadow: 8px 8px 18px var(--shadow-dark), -8px -8px 18px var(--shadow-light); }
+    .code-box .code { font-size: 3.1rem; font-weight: 800; letter-spacing: .18em; line-height: 1.05; }
+    .code-box small { opacity: .85; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; font-size: .68rem; }
+    .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .controls .wide { grid-column: 1 / -1; }
+    .req { border-left: 4px solid var(--amber); }
+    .q-progress i.now { background: var(--blue); animation: pulse 1.2s infinite; }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <!-- Górny Pasek (Nawigacja i Profil) -->
-    <header class="neu-card header-bar">
-      <div>
-        <h1 class="logo" id="logoText">ClassQuest</h1>
-        <p class="subtitle" id="teacherWelcome">Wczytywanie danych...</p>
-      </div>
-
-      <div class="header-actions">
-        <button class="neu-btn neu-btn-square" id="themeToggle" title="Zmień motyw">🌙</button>
-        <button class="neu-btn neu-btn-danger" id="logoutBtn">Wyloguj się 🚪</button>
-      </div>
-    </header>
-
-    <!-- Główna zawartość -->
-    <div class="grid-layout">
-      
-      <!-- Panel Lewy: Zarządzanie i Przyznawanie XP -->
-      <div class="neu-card">
-        <h2 class="section-title">⚡ Przyznaj Punkty XP</h2>
-        
-        <form id="add-xp-form">
-          <div class="neu-input-wrapper">
-            <label class="neu-label" for="student-select">Wybierz Ucznia</label>
-            <select id="student-select" class="neu-select" required>
-              <option value="">Ładowanie listy uczniów...</option>
-            </select>
-          </div>
-
-          <div class="neu-input-wrapper">
-            <label class="neu-label" for="xp-amount">Ilość XP</label>
-            <input type="number" id="xp-amount" class="neu-input" placeholder="np. 50" min="1" required>
-          </div>
-
-          <div class="neu-input-wrapper">
-            <label class="neu-label" for="xp-reason">Powód / Zadanie</label>
-            <input type="text" id="xp-reason" class="neu-input" placeholder="np. Aktywność na lekcji" required>
-          </div>
-
-          <button type="submit" class="neu-btn" style="width: 100%; margin-top: 10px;">Dodaj XP ✨</button>
-        </form>
-      </div>
-
-      <!-- Panel Prawy: Lista Uczniów Klasy -->
-      <div class="neu-card">
-        <h2 class="section-title">🏆 Ranking i Poziomy Klasy</h2>
-        <div id="students-container" class="student-list">
-          <div class="empty-state">Pobieranie listy uczniów...</div>
-        </div>
-      </div>
-
+<div class="container">
+  <div class="page-head row-between wrap">
+    <div>
+      <h1 id="greeting">Wczytywanie…</h1>
+      <p id="sub-greeting">Panel prowadzenia lekcji</p>
     </div>
-
-    <!-- Sekcja Dodatkowa: Oczekujące Aktywności / Zgłoszenia -->
-    <div class="neu-card">
-      <h2 class="section-title">📥 Oczekujące Weryfikacje Zgłoszeń</h2>
-      <div id="requests-container" class="requests-list">
-        <div class="empty-state">Brak nowych zgłoszeń od uczniów.</div>
-      </div>
+    <div class="row-8 wrap">
+      <span id="mode-slot"></span>
+      <a class="neu-btn sm" href="tablica.html">📽️ Otwórz tablicę</a>
+      <a class="neu-btn sm" href="pomoc.html">📖 Pomoc</a>
     </div>
   </div>
 
-  <script src="supabase.js"></script>
+  <div class="grid-4 mb-24" id="stats"></div>
 
-  <script>
-    // 1. Animacja liter w logo
-    function animateText(elementId, baseDelay) {
-      const el = document.getElementById(elementId);
-      if (!el) return;
-      const text = el.innerText;
-      el.innerHTML = '';
-      
-      [...text].forEach((char, index) => {
-        const span = document.createElement('span');
-        span.className = 'char';
-        span.innerHTML = char === ' ' ? '&nbsp;' : char;
-        span.style.animationDelay = `${baseDelay + (index * 0.035)}s`;
-        el.appendChild(span);
-      });
+  <div class="split-sidebar">
+    <!-- ============ STEROWANIE GRĄ ============ -->
+    <div class="stack stack-16" style="position:sticky;top:calc(var(--header-h) + 12px)">
+      <div class="neu-card" id="control-card">
+        <div class="section-title">🎛️ Sterowanie grą <span class="spacer"></span><span id="ctl-status"></span></div>
+        <div id="control-body"></div>
+      </div>
+    </div>
+
+    <!-- ============ PRAWA KOLUMNA ============ -->
+    <div class="stack stack-24">
+      <div class="neu-card">
+        <div class="section-title">🏆 Ranking i poziomy klasy
+          <span class="spacer"></span>
+          <div class="select-wrap" style="width:170px"><select class="neu-select" id="rank-class"></select></div>
+        </div>
+        <div class="list" id="ranking"></div>
+      </div>
+
+      <div class="neu-card">
+        <div class="section-title">📥 Zgłoszenia do weryfikacji <span class="spacer"></span><span id="req-count"></span></div>
+        <div class="list" id="requests"></div>
+      </div>
+
+      <div class="neu-card">
+        <div class="section-title">🕓 Ostatnie gry <span class="spacer"></span><a class="small semi" href="wyniki.html">pełne raporty →</a></div>
+        <div class="list" id="history"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/store.js"></script>
+<script src="assets/js/ui.js"></script>
+<script type="module">
+  const { ui } = CQ;
+  const $ = (s) => document.querySelector(s);
+  const me = await ui.bootTeacher({ active: 'nauczyciel' });
+  if (!me) throw new Error('brak dostępu');
+
+  await CQ.store.ready();
+  $('#mode-slot').innerHTML = ui.modeChip();
+  const firstName = me.imie_nazwisko.split(' ')[0];
+  $('#greeting').textContent = `Cześć, ${firstName}!`;
+  ui.animateText('#greeting', 0.1, 0.028);
+  $('#sub-greeting').textContent = me.przedmiot ? `Prowadzisz lekcje: ${me.przedmiot}` : 'Panel prowadzenia lekcji';
+
+  const LS_ACTIVE = 'cq_aktywna_sesja';
+  let sesjaId = localStorage.getItem(LS_ACTIVE) || null;
+  let autoDalej = localStorage.getItem('cq_auto_dalej') === '1';
+
+  /* ------------------------------------------------ statystyki ----------- */
+  function renderStats() {
+    const s = CQ.Raporty.przeglad(me.id);
+    const cards = [
+      ['Klasy', s.klasy, `${s.uczniowie} uczniów`],
+      ['Bank pytań', s.zestawy, `${s.pytania} pytań`],
+      ['Rozegrane gry', s.sesje, `${s.odpowiedzi} odpowiedzi`],
+      ['Dokładność klasy', s.dokladnosc + '%', `${s.xp.toLocaleString('pl-PL')} XP rozdanych`],
+    ];
+    $('#stats').innerHTML = cards.map(([label, value, hint]) =>
+      `<div class="stat"><div class="label">${label}</div><div class="value">${value}</div><div class="hint">${hint}</div></div>`).join('');
+  }
+
+  /* ------------------------------------------------ tworzenie gry -------- */
+  function setupFormHtml() {
+    const klasy = CQ.Klasy.list(me.id);
+    const zestawy = CQ.Zestawy.list(me.id).filter((z) => CQ.Zestawy.pytania(z.id).length);
+    if (!klasy.length || !zestawy.length) {
+      return ui.empty('🧰', 'Najpierw przygotuj materiały',
+        !klasy.length ? 'Dodaj klasę i listę uczniów.' : 'Dodaj zestaw z co najmniej jednym pytaniem.',
+        `<div class="row-8" style="justify-content:center">
+           ${!klasy.length ? '<a class="neu-btn sm primary" href="klasy.html">Zarządzaj klasami</a>' : ''}
+           ${!zestawy.length ? '<a class="neu-btn sm" href="zestawy.html">Bank pytań</a>' : ''}
+         </div>`);
     }
 
-    animateText('logoText', 0.2);
+    return `
+      <form class="setup-form" id="setup">
+        <div><label class="neu-label" for="s-klasa">Klasa</label>
+          <div class="select-wrap"><select class="neu-select" id="s-klasa">${klasy.map((k) => `<option value="${k.id}">${ui.esc(k.nazwa)}</option>`).join('')}</select></div></div>
+        <div><label class="neu-label" for="s-zestaw">Zestaw pytań</label>
+          <div class="select-wrap"><select class="neu-select" id="s-zestaw">${zestawy.map((z) => `<option value="${z.id}">${ui.esc(z.nazwa_zestawu)} (${CQ.Zestawy.pytania(z.id).length} pytań)</option>`).join('')}</select></div></div>
+        <div><label class="neu-label" for="s-tryb">Tryb</label>
+          <div class="select-wrap"><select class="neu-select" id="s-tryb">${Object.entries(CQ.TRYBY).filter(([k]) => k !== 'trening').map(([k, v]) => `<option value="${k}">${v.ikona} ${v.nazwa}</option>`).join('')}</select></div></div>
+        <div class="grid-2" style="gap:10px">
+          <div><label class="neu-label" for="s-limit">Sekund na pytanie</label><input class="neu-input" id="s-limit" type="number" min="5" max="120" value="20"></div>
+          <div><label class="neu-label" for="s-klasa-xp">&nbsp;</label>
+            <label class="switch" for="s-klasa-xp"><input type="checkbox" id="s-klasa-xp" checked><span class="track"><span class="thumb"></span></span>Nagrodź XP na koniec</label></div>
+        </div>
+        <button class="neu-btn primary block lg" type="submit">Uruchom grę 🚀</button>
+        <p class="tiny muted">Uczniowie mogą dołączać kodem w każdej chwili — do biegnącego pytania wskakują od następnego.</p>
+      </form>`;
+  }
 
-    // 2. Obsługa Dark / Light Mode
-    const themeToggleBtn = document.getElementById('themeToggle');
-    const savedTheme = localStorage.getItem('theme');
-    let isDark = savedTheme === 'dark';
-
-    function applyTheme(dark) {
-      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-      themeToggleBtn.textContent = dark ? '☀️' : '🌙';
-      localStorage.setItem('theme', dark ? 'dark' : 'light');
-    }
-
-    applyTheme(isDark);
-
-    themeToggleBtn.addEventListener('click', () => {
-      isDark = !isDark;
-      applyTheme(isDark);
+  function bindSetup() {
+    const form = $('#setup');
+    if (!form) return;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button');
+      btn.classList.add('spin');
+      try {
+        const sesja = await CQ.Gra.createSession({
+          nauczycielId: me.id,
+          klasaId: $('#s-klasa').value,
+          zestawId: $('#s-zestaw').value,
+          tryb: $('#s-tryb').value,
+          limitS: $('#s-limit').value,
+          nagrodaXp: $('#s-klasa-xp').checked,
+        });
+        localStorage.setItem(LS_ACTIVE, sesja.id);
+        sesjaId = sesja.id;
+        ui.toast(`Gra gotowa — kod ${sesja.kod}`, 'ok');
+        renderControl();
+      } catch (err) {
+        ui.toast(err.message, 'err');
+        btn.classList.remove('spin');
+      }
     });
+  }
 
-    // 3. Główna logika Panelu Nauczyciela
-    let currentTeacher = null;
+  /* ------------------------------------------------ sterowanie ----------- */
+  function renderControl() {
+    const sesja = sesjaId ? CQ.store.byId('sesje', sesjaId) : null;
+    $('#ctl-status').innerHTML = sesja ? ui.statusBadge(sesja.status) : '';
 
-    window.addEventListener('DOMContentLoaded', async () => {
-      currentTeacher = getCurrentTeacher();
+    if (!sesja || sesja.status === 'koniec') {
+      const done = sesja && sesja.status === 'koniec';
+      $('#control-body').innerHTML =
+        (done
+          ? `<div class="neu-card inset pad-sm mb-16">Ostatnia gra (<b>${ui.esc(sesja.kod)}</b>) jest zakończona.
+             <div class="row-8 mt-8"><a class="neu-btn sm" href="wyniki.html?sesja=${sesja.id}">Zobacz raport</a></div></div>`
+          : '<p class="muted small mb-16">Nie masz aktywnej gry. Wybierz klasę i zestaw — klasa dostanie kod pokoju.</p>')
+        + setupFormHtml();
+      bindSetup();
+      return;
+    }
 
-      if (!currentTeacher) {
-        window.location.href = 'logowanie.html';
+    const qs = CQ.Gra.pytania(sesja);
+    const gracze = CQ.Gra.gracze(sesja.id);
+    const wynik = CQ.Gra.wynik(sesja.id);
+    const stan = CQ.Gra.stanCzasu(sesja);
+    const zestaw = CQ.store.byId('zestawy', sesja.zestaw_id);
+    const klasa = CQ.store.byId('klasy', sesja.klasa_id);
+
+    const panel = document.createElement('div');
+    panel.innerHTML = `
+      <div class="code-box mb-16">
+        <small>Kod do gry</small>
+        <div class="code">${sesja.kod}</div>
+        <small>${ui.esc(zestaw ? zestaw.nazwa_zestawu : '')} · ${ui.esc(klasa ? klasa.nazwa : '')} · tryb ${CQ.TRYBY[sesja.tryb].nazwa}</small>
+      </div>
+      <div class="row-8 wrap mb-16">
+        <a class="neu-btn sm primary" href="tablica.html?sesja=${sesja.id}" target="_blank" rel="noopener">📽️ Tablica</a>
+        <button class="neu-btn sm" data-act="copy">📋 Kopiuj kod</button>
+        <button class="neu-btn sm" data-act="copylink">🔗 Link dla klasy</button>
+        <span class="grow"></span>
+        <button class="neu-btn sm ghost" data-act="finish" title="Zakończ i policz XP">Zakończ ⏹️</button>
+      </div>
+      <div class="q-progress mb-16" title="Postęp">
+        ${qs.map((q, i) => `<i class="${i < sesja.indeks ? 'done' : i === sesja.indeks ? 'now' : ''}"></i>`).join('')}
+        <span class="tiny muted" style="margin-left:8px">pytanie ${Math.min(sesja.indeks + 1, qs.length)} / ${qs.length}</span>
+      </div>
+      <div id="live-slot" class="mb-16"></div>
+      <div class="controls" id="ctl-buttons"></div>
+      <label class="switch mt-16" for="auto-next"><input type="checkbox" id="auto-next" ${autoDalej ? 'checked' : ''}><span class="track"><span class="thumb"></span></span>Sam przechodź po upływie czasu</label>
+      <div class="mt-16">
+        <div class="row-between mb-8"><span class="neu-label" style="margin:0">Gracze (${gracze.length})</span>
+          <span class="tiny muted">kod klasy: ${ui.esc(klasa ? klasa.kod : '—')}</span></div>
+        <div class="players mt-8" id="players">${gracze.length ? gracze.map((g) => playerRow(g, wynik)).join('') : '<div class="empty-state" style="grid-column:1/-1;padding:16px">Czekamy na klasę…</div>'}</div>
+      </div>`;
+
+    // przyciski zależne od fazy
+    const buttons = panel.querySelector('#ctl-buttons');
+    const B = (label, act, cls = '') => ui.el('button', { class: `neu-btn ${cls}`, text: label, dataset: { act } });
+    if (sesja.status === 'lobby') {
+      buttons.append(B(`Start — ${qs.length} pytań ▶`, 'start', 'primary block lg'));
+      buttons.lastChild.classList.remove('block');
+      buttons.lastChild.style.gridColumn = '1 / -1';
+      buttons.append(B('Zamknij grę', 'close', 'danger'));
+    } else if (sesja.status === 'pytanie') {
+      buttons.append(B('Pokaż wynik ⏸', 'reveal', 'primary'));
+      buttons.append(B('Pomiń pytanie →', 'skip'));
+      buttons.append(B('Zakończ i nalicz XP', 'finish', 'danger wide'));
+    } else if (sesja.status === 'podsumowanie') {
+      buttons.append(B(sesja.indeks + 1 >= qs.length ? 'Koniec gry 🏁' : 'Następne pytanie →', 'next', 'primary'));
+      buttons.append(B('Wróć do lobby', 'lobby'));
+      buttons.append(B('Nagrodź liderów +20 XP', 'reward', 'success wide'));
+    } else if (sesja.status === 'przerwa') {
+      buttons.append(B('Wznów pytanie ▶', 'resume', 'primary'));
+      buttons.append(B('Dalej →', 'next'));
+    }
+
+    // podgląd bieżącego pytania
+    const live = panel.querySelector('#live-slot');
+    const q = CQ.Gra.aktualnePytanie(sesja);
+    if (sesja.status === 'pytanie' && q) {
+      const stat = CQ.Gra.statystykiPytania(sesja.id, q.id);
+      const frac = Math.max(0, Math.min(1, stan.pozostalo / (sesja.limit_s || 20)));
+      const ring = ui.timerRing(stan.pozostalo);
+      live.innerHTML = `<div class="neu-card inset pad-sm"><div class="row-16">
+        <div id="ring-holder"></div>
+        <div class="grow"><b class="small">${ui.esc(q.tresc)}</b>
+        <div class="tiny muted mt-8">${stat.odp}/${gracze.length} odpowiedziało · ${stat.poprawnych} poprawnych · ok. ${ui.fmtSec(stat.sredniCzas)} średnio</div></div>
+      </div></div>`;
+      live.querySelector('#ring-holder').appendChild(ring);
+      panel._tick = () => ring.setValue(frac, stan.pozostalo);
+    } else if (sesja.status === 'podsumowanie' && q) {
+      live.innerHTML = `<div class="neu-card inset pad-sm">
+        <b class="small">${ui.esc(q.tresc)}</b>
+        <div class="mt-8 small">Poprawna: <b style="color:var(--green)">${ui.esc(q.typ === 'otwarte' ? q.poprawna_odp.split(';')[0] : q[q.poprawna_opcja === 'A' ? 'opcja_a' : q.poprawna_opcja === 'B' ? 'opcja_b' : q.poprawna_opcja === 'C' ? 'opcja_c' : 'opcja_d'] || q.poprawna_opcja)}</b></div>
+        ${q.wytlumaczenie ? `<div class="tiny muted mt-8">${ui.esc(q.wytlumaczenie)}</div>` : ''}
+      </div>`;
+    } else if (sesja.status === 'lobby') {
+      live.innerHTML = `<div class="neu-card inset pad-sm small muted">Lobby otwarte. Start uruchomi pierwsze pytanie — uczniowie w tym momencie zobaczą je na swoich ekranach.</div>`;
+    }
+
+    buttons.addEventListener('click', async (e) => {
+      const act = e.target.closest('[data-act]')?.dataset.act;
+      if (!act) return;
+      await handleAction(act, sesja);
+    });
+    panel.querySelector('#auto-next').addEventListener('change', (ev) => {
+      autoDalej = ev.target.checked;
+      localStorage.setItem('cq_auto_dalej', autoDalej ? '1' : '0');
+    });
+    $('#control-body').innerHTML = '';
+    $('#control-body').appendChild(panel);
+    tickControl = panel._tick || null;
+  }
+
+  function playerRow(g, wynik) {
+    const r = (wynik.rows || []).find((x) => x.id === g.id) || {};
+    const team = g.zespol != null ? CQ.ZESPOLY[g.zespol | 0] : null;
+    return `<div class="player" title="${ui.esc(g.nazwa)}${r.miejsce ? ' · miejsce ' + r.miejsce : ''}">
+      ${ui.avatar(g.nazwa, g.kolor, g.nakrycie)}
+      <span class="nm">${ui.esc(g.nazwa)}${team ? ` <small class="muted">${team.emoji}</small>` : ''}</span>
+      <span class="pp">${r.punkty ? ui.fmtPts(r.punkty) : '0'}</span>
+      <button class="neu-btn square sm" data-reward="${g.id}" data-nazwa="${ui.esc(g.nazwa)}" title="Nagrodź 20 XP">✨</button>
+    </div>`;
+  }
+
+  async function handleAction(act, sesja) {
+    try {
+      if (act === 'copy') { await ui.copy(sesja.kod); ui.toast('Skopiowano kod ' + sesja.kod, 'ok', 1800); return; }
+      if (act === 'copylink') {
+        const link = new URL('gra.html?kod=' + sesja.kod, location.href).href;
+        await ui.copy(link);
+        ui.toast('Link do gry skopiowany — wyślij klasie.', 'ok', 2600);
         return;
       }
-
-      document.getElementById('teacherWelcome').textContent = `Witaj, ${currentTeacher.name}!`;
-
-      await loadStudents();
-      await loadPendingRequests();
-    });
-
-    // Ładowanie uczniów
-    async function loadStudents() {
-      const selectEl = document.getElementById('student-select');
-      const containerEl = document.getElementById('students-container');
-
-      try {
-        const students = await getStudentsByTeacher(currentTeacher.id);
-
-        if (!students || students.length === 0) {
-          selectEl.innerHTML = '<option value="">Brak uczniów w klasie</option>';
-          containerEl.innerHTML = '<div class="empty-state">Brak przypisanych uczniów.</div>';
+      if (act === 'start') await CQ.Gra.start(sesja.id);
+      else if (act === 'reveal') await CQ.Gra.reveal(sesja.id);
+      else if (act === 'next' || act === 'skip') {
+        if (act === 'skip') await CQ.Gra.reveal(sesja.id);
+        await CQ.Gra.next(sesja.id);
+      } else if (act === 'resume') await CQ.Gra.pause(sesja.id);
+      else if (act === 'lobby') await CQ.Gra.openLobby(sesja.id);
+      else if (act === 'close' || act === 'finish') {
+        const yes = await ui.confirmBox('Zakończyć grę?',
+          act === 'close' ? 'Gra zostanie zamknięta bez naliczania XP.' : 'Punkty zostaną przeliczone na XP i zapisane w dzienniku klasy.');
+        if (!yes) return;
+        if (act === 'close') { await CQ.store.update('sesje', sesja.id, { status: 'koniec', zakonczo: CQ.nowISO(), start_od: null }); }
+        else {
+          const res = await CQ.Gra.finish(sesja.id);
+          const n = res.wynik.rows.length;
+          ui.toast(n ? `Koniec! XP przydzielone ${n} osobom.` : 'Koniec gry (bez graczy).', 'ok');
+          renderAll();
           return;
         }
+      } else if (act === 'reward') {
+        const top = CQ.Gra.wynik(sesja.id).rows[0];
+        if (!top || !top.uczen_id) return ui.toast('Brak ucznia do nagrodzenia.', 'warn');
+        await CQ.Uczniowie.awardXp(top.uczen_id, 20, `Bonus w grze ${sesja.kod}`, 'bonus', sesja.id);
+        ui.toast(`+20 XP dla ${top.nazwa}`, 'ok');
+      }
+      renderAll();
+    } catch (err) { ui.toast(err.message, 'err'); }
+  }
 
-        // Sortowanie po XP (malejąco)
-        students.sort((a, b) => (b.xp || 0) - (a.xp || 0));
+  // nagradzanie z listy graczy
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-reward]');
+    if (!btn) return;
+    const g = CQ.store.byId('gracze', btn.dataset.reward);
+    if (!g) return;
+    if (!g.uczen_id) {
+      const yes = await ui.confirmBox('Uczeń spoza dziennika', `${g.nazwa} nie jest przypisany do listy klasy. Zapisać go w klasie i przyznać 20 XP?`);
+      if (!yes) return;
+      const sesja = CQ.store.byId('sesje', g.sesja_id);
+      const uczen = await CQ.Uczniowie.add(sesja.klasa_id, g.nazwa);
+      await CQ.store.update('gracze', g.id, { uczen_id: uczen.id });
+      await CQ.Uczniowie.awardXp(uczen.id, 20, 'Dołączenie w trakcie gry', 'bonus', sesja.id);
+    } else {
+      await CQ.Uczniowie.awardXp(g.uczen_id, 20, 'Nagroda w trakcie gry', 'bonus', g.sesja_id);
+    }
+    ui.toast('Przyznano 20 XP ✨', 'ok', 1600);
+    renderAll();
+  });
 
-        // Wypełnianie Selecta
-        selectEl.innerHTML = '<option value="">-- Wybierz Ucznia --</option>' + 
-          students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+  /* ------------------------------------------------ ranking -------------- */
+  function renderRanking() {
+    const klasy = CQ.Klasy.list(me.id);
+    const sel = $('#rank-class');
+    const prev = sel.value || localStorage.getItem('cq_rank_class') || (klasy[0] && klasy[0].id);
+    sel.innerHTML = klasy.map((k) => `<option value="${k.id}" ${k.id === prev ? 'selected' : ''}>${ui.esc(k.nazwa)}</option>`).join('');
+    if (!klasy.length) { $('#ranking').innerHTML = ui.empty('👥', 'Brak klas', 'Dodaj klasę, aby zobaczyć ranking.'); return; }
+    localStorage.setItem('cq_rank_class', sel.value);
 
-        // Wypełnianie Listy
-        containerEl.innerHTML = students.map((s, idx) => {
-          const level = Math.floor((s.xp || 0) / 100) + 1;
-          return `
-            <div class="list-item">
-              <div class="student-info">
-                <span class="student-name">#${idx + 1} ${s.name}</span>
-                <span class="student-stats">${s.xp || 0} XP • Poziom ${level}</span>
-              </div>
-              <span class="badge">Poziom ${level}</span>
-            </div>
-          `;
-        }).join('');
+    const rows = CQ.Raporty.rankingKlasy(sel.value);
+    if (!rows.length) { $('#ranking').innerHTML = ui.empty('🎈', 'Klasa jest pusta', 'Dodaj uczniów na stronie „Klasy”.'); return; }
+    $('#ranking').innerHTML = rows.map((r, i) => `
+      <div class="rank-row ${i < 3 ? 'top' + (i + 1) : ''}">
+        <span class="pos">${i + 1}</span>
+        <span class="num muted" style="width:26px">${r.numer || '—'}</span>
+        <span class="grow semi">${ui.esc(r.nazwa)}</span>
+        ${ui.levelBadge(r.xp)}
+        <span class="pts">${ui.fmtPts(r.xp)} XP</span>
+        <button class="neu-btn square sm" data-xp="${r.id}" data-nazwa="${ui.esc(r.nazwa)}" title="Przyznaj XP">＋</button>
+      </div>`).join('');
+  }
 
-      } catch (err) {
-        console.error("Błąd podczas ładowania uczniów:", err);
-        containerEl.innerHTML = '<div class="empty-state" style="color: var(--red-main)">Nie udało się pobrać listy uczniów.</div>';
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-xp]');
+    if (!btn) return;
+    const v = await ui.formModal('Przyznaj XP', [
+      { name: 'kwota', label: 'Ile punktów XP', type: 'number', value: 20, min: -200, required: true, hint: 'Możesz wpisać liczbę ujemną, by cofnąć błąd.' },
+      { name: 'powod', label: 'Za co', placeholder: 'np. aktywność na lekcji', required: true },
+    ], { okLabel: 'Przyznaj' });
+    if (!v) return;
+    try {
+      await CQ.Uczniowie.awardXp(btn.dataset.xp, v.kwota, v.powod, 'manualne');
+      ui.toast(`${v.kwota > 0 ? '+' : ''}${v.kwota} XP dla ${btn.dataset.nazwa}`, 'ok');
+      renderAll();
+    } catch (err) { ui.toast(err.message, 'err'); }
+  });
+
+  /* ------------------------------------------------ zgłoszenia ----------- */
+  function renderRequests() {
+    const lista = CQ.Zgloszenia.forTeacher(me.id, 'oczekuje');
+    $('#req-count').innerHTML = lista.length ? ui.badge(`${lista.length} czeka`, 'amber') : ui.badge('czysto', 'green');
+    $('#requests').innerHTML = lista.length ? lista.map((z) => {
+      const u = CQ.store.byId('uczniowie', z.uczen_id);
+      const k = u && CQ.store.byId('klasy', u.klasa_id);
+      return `<div class="list-item req">
+        <span class="lead amber">${z.xp}</span>
+        <div class="body"><strong>${ui.esc(z.tytul)}</strong>
+          <small>${ui.esc(u ? u.nazwa : 'Uczeń usunięty')}${k ? ' · ' + ui.esc(k.nazwa) : ''}${z.opis ? ' — ' + ui.esc(z.opis) : ''} · ${ui.fmtAgo(z.utworzono)}</small></div>
+        <div class="row-8">
+          <button class="neu-btn sm success" data-req="ok" data-id="${z.id}">Zatwierdź 👍</button>
+          <button class="neu-btn sm danger" data-req="no" data-id="${z.id}">Odrzuć</button>
+        </div>
+      </div>`;
+    }).join('') : ui.empty('📭', 'Brak oczekujących zgłoszeń', 'Uczniowie zgłaszają zadania ze strefy ucznia albo z ekranu wyników gry.');
+  }
+
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-req]');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    if (btn.dataset.req === 'ok') {
+      await CQ.Zgloszenia.approve(id);
+      ui.toast('Zatwierdzone — XP dopisane do konta ucznia.', 'ok');
+    } else {
+      const v = await ui.formModal('Odrzuć zgłoszenie', [{ name: 'komentarz', label: 'Powód (widzi go uczeń)', placeholder: 'np. brakuje rozwiązania pkt 3' }], { okLabel: 'Odrzuć' });
+      if (v === null) return;
+      await CQ.Zgloszenia.reject(id, v.komentarz);
+      ui.toast('Zgłoszenie odrzucone.', 'warn');
+    }
+    renderAll();
+  });
+
+  /* ------------------------------------------------ historia ------------- */
+  function renderHistory() {
+    const sesje = CQ.Gra.historia(me.id).slice(0, 5);
+    $('#history').innerHTML = sesje.length ? sesje.map((s) => {
+      const z = CQ.store.byId('zestawy', s.zestaw_id);
+      const w = CQ.Gra.wynik(s.id);
+      const winner = w.rows[0];
+      return `<div class="list-item clickable" onclick="location.href='wyniki.html?sesja=${s.id}'">
+        <span class="lead green">🏁</span>
+        <div class="body"><strong>${ui.esc(z ? z.nazwa_zestawu : 'Zestaw usunięty')}</strong>
+          <small>${ui.fmtDate(s.zakonczo || s.utworzono)} · ${w.rows.length} graczy · ${CQ.TRYBY[s.tryb]?.nazwa || s.tryb}</small></div>
+        <span class="badge blue">${winner ? ui.esc(winner.nazwa) + ' 🥇' : '—'}</span>
+      </div>`;
+    }).join('') : ui.empty('📜', 'Historia pusta', 'Zagraj pierwszą lekcję, a pojawią się tu raporty.');
+  }
+
+  function renderAll() { renderStats(); renderControl(); renderRanking(); renderRequests(); renderHistory(); }
+  $('#rank-class').addEventListener('change', renderRanking);
+
+  // tyknięcie licznika + auto-przejście
+  let tickControl = null;
+  setInterval(() => {
+    if (tickControl) tickControl();
+    const sesja = sesjaId ? CQ.store.byId('sesje', sesjaId) : null;
+    if (autoDalej && sesja && sesja.status === 'pytanie') {
+      const st = CQ.Gra.stanCzasu(sesja);
+      if (st.pozostalo <= 0) {
+        CQ.Gra.reveal(sesja.id).then(renderAll);
+        ui.toast('Czas minął — pokazuję odpowiedzi.', 'info', 2200);
       }
     }
+  }, 400);
 
-    // Dodawanie XP
-    document.getElementById('add-xp-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const studentId = document.getElementById('student-select').value;
-      const amount = parseInt(document.getElementById('xp-amount').value, 10);
-      const reason = document.getElementById('xp-reason').value.trim();
+  document.addEventListener('keydown', (e) => {
+    if (e.target.matches('input,textarea,select')) return;
+    const sesja = sesjaId ? CQ.store.byId('sesje', sesjaId) : null;
+    if (!sesja) return;
+    const map = { ' ': sesja.status === 'lobby' ? 'start' : sesja.status === 'pytanie' ? 'reveal' : 'next', n: 'next', r: 'reveal', f: 'finish', p: 'resume' };
+    const act = map[e.key.toLowerCase()];
+    if (!act) return;
+    e.preventDefault();
+    handleAction(act, sesja);
+  });
 
-      if (!studentId || isNaN(amount) || !reason) return;
 
-      try {
-        await addXpToStudent(studentId, amount, reason);
-        document.getElementById('xp-amount').value = '';
-        document.getElementById('xp-reason').value = '';
-        await loadStudents();
-      } catch (err) {
-        console.error("Błąd dodawania XP:", err);
-      }
-    });
-
-    // Ładowanie oczekujących zgłoszeń
-    async function loadPendingRequests() {
-      const containerEl = document.getElementById('requests-container');
-      try {
-        const requests = await getPendingRequests(currentTeacher.id);
-
-        if (!requests || requests.length === 0) {
-          containerEl.innerHTML = '<div class="empty-state">Brak nowych zgłoszeń od uczniów.</div>';
-          return;
-        }
-
-        containerEl.innerHTML = requests.map(req => `
-          <div class="list-item">
-            <div class="student-info">
-              <span class="student-name">${req.student_name}</span>
-              <span class="student-stats">${req.task_name} (+${req.xp_reward} XP)</span>
-            </div>
-            <div style="display: flex; gap: 8px;">
-              <button class="neu-btn" style="padding: 8px 14px;" onclick="handleApprove('${req.id}', '${req.student_id}', ${req.xp_reward})">Zatwierdź 👍</button>
-              <button class="neu-btn neu-btn-danger" style="padding: 8px 14px;" onclick="handleReject('${req.id}')">Odrzuć ❌</button>
-            </div>
-          </div>
-        `).join('');
-      } catch (err) {
-        console.error("Błąd ładowania zgłoszeń:", err);
-      }
-    }
-
-    async function handleApprove(requestId, studentId, xp) {
-      await approveRequest(requestId, studentId, xp);
-      await loadStudents();
-      await loadPendingRequests();
-    }
-
-    async function handleReject(requestId) {
-      await rejectRequest(requestId);
-      await loadPendingRequests();
-    }
-
-    // Wylogowanie
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-      logoutTeacher();
-      window.location.href = 'logowanie.html';
-    });
-  </script>
+  ui.live(renderAll);
+  renderAll();
+</script>
 </body>
 </html>

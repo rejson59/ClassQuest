@@ -1,1 +1,369 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administracja — ClassQuest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <style>
+    .kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+    .tabs-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .log { font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace; font-size: .78rem; }
+    .danger-zone { border: 2px solid var(--red-soft); }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="page-head row-between wrap">
+    <div><h1>🛡️ Administracja</h1><p>Konta nauczycieli, zdrowie danych i operacje na całej instalacji ClassQuest.</p></div>
+    <div class="row-8 wrap"><span id="mode-slot"></span>
+      <a class="neu-btn sm" href="ustawienia.html">Ustawienia</a>
+      <a class="neu-btn sm" href="pomoc.html">Pomoc</a></div>
+  </div>
 
+  <div class="neu-card mb-24">
+    <div class="kpi" id="kpi"></div>
+  </div>
+
+  <div class="tabs-row mb-16" id="tabs">
+    <button class="tab-btn active" data-tab="nauczyciele">👩‍🏫 Nauczyciele</button>
+    <button class="tab-btn" data-tab="klasy">🏫 Klasy i zestawy</button>
+    <button class="tab-btn" data-tab="sesje">🎮 Sesje gier</button>
+    <button class="tab-btn" data-tab="konserwacja">🧰 Konserwacja</button>
+    <button class="tab-btn" data-tab="dziennik">📜 Dziennik zdarzeń</button>
+  </div>
+
+  <div class="neu-card" id="tab-nauczyciele"></div>
+  <div class="neu-card hidden" id="tab-klasy"></div>
+  <div class="neu-card hidden" id="tab-sesje"></div>
+  <div class="neu-card hidden" id="tab-konserwacja"></div>
+  <div class="neu-card hidden" id="tab-dziennik"></div>
+</div>
+
+<script src="assets/js/store.js"></script>
+<script src="assets/js/ui.js"></script>
+<script type="module">
+  const { ui } = CQ;
+  const $ = (s) => document.querySelector(s);
+  await CQ.store.ready();
+  const me = CQ.Auth.current();
+  if (!me) { location.replace('admin-logowanie.html'); throw new Error('brak sesji'); }
+  if (me.rola !== 'admin') {
+    document.body.innerHTML = `<div class="auth-layout"><div class="neu-card auth-card center">
+      <h1>Tylko dla administratora</h1>
+      <p class="muted small mt-8">Zalogowane konto <b>${ui.esc(me.imie_nazwisko)}</b> ma rolę „nauczyciel”.
+      Panel administratora wymaga konta z rolą admin.</p>
+      <div class="row-8 mt-24" style="justify-content:center">
+        <a class="neu-btn primary" href="nauczyciel.html">Idź do panelu nauczyciela</a>
+        <button class="neu-btn" id="switch">Zmień konto</button></div></div></div>`;
+    document.getElementById('switch').onclick = () => { CQ.Auth.logout(); location.href = 'admin-logowanie.html'; };
+    throw new Error('nie admin');
+  }
+  ui.bootHeader({ active: 'admin', links: ['admin', 'ustawienia', 'pomoc'], user: me });
+  $('#mode-slot').innerHTML = ui.modeChip();
+
+  /* ---- KPI ---- */
+  function renderKpi() {
+    const db = CQ.store.db;
+    const odp = db.odpowiedzi;
+    const items = [
+      ['Nauczyciele', db.nauczyciele.length, db.nauczyciele.filter((n) => n.rola === 'admin').length + ' adminów'],
+      ['Klasy', db.klasy.length, db.uczniowie.length + ' uczniów'],
+      ['Bank pytań', db.zestawy.length, db.pytania.length + ' pytań'],
+      ['Sesje gier', db.sesje.length, db.sesje.filter((s) => s.status !== 'koniec').length + ' aktywne'],
+      ['Odpowiedzi', odp.length, odp.length ? Math.round(odp.filter((o) => o.poprawna).length / odp.length * 100) + '% dobrze' : '—'],
+      ['Rozdane XP', db.wpisy_xp.reduce((a, b) => a + (b.kwota || 0), 0), db.zgloszenia.filter((z) => z.status === 'oczekuje').length + ' wniosków czeka'],
+    ];
+    $('#kpi').innerHTML = items.map(([l, v, h]) =>
+      `<div class="stat"><div class="label">${l}</div><div class="value">${typeof v === 'number' ? ui.fmtPts(v) : v}</div><div class="hint">${h}</div></div>`).join('');
+  }
+
+  /* ---- nauczyciele ---- */
+  function renderTeachers() {
+    const rows = CQ.store.table('nauczyciele').slice().sort((a, b) => String(a.imie_nazwisko).localeCompare(b.imie_nazwisko, 'pl'));
+    $('#tab-nauczyciele').innerHTML = `
+      <div class="section-title">👩‍🏫 Konta nauczycieli <span class="spacer"></span>
+        <button class="neu-btn sm primary" data-add-t>➕ Nowe konto</button>
+        <button class="neu-btn sm" data-csv>⬇️ CSV kont</button></div>
+      <div class="table-wrap"><table class="data">
+        <thead><tr><th>Osoba</th><th>Role</th><th>Zasoby</th><th>Ostatnie logowanie</th><th></th></tr></thead>
+        <tbody>${rows.map((t) => {
+          const klasy = CQ.store.where('klasy', (k) => k.nauczyciel_id === t.id).length;
+          const zestawy = CQ.Zestawy.list(t.id).length;
+          const pytania = CQ.store.where('pytania', (p) => CQ.Zestawy.list(t.id).some((z) => z.id === p.zestaw_id)).length;
+          return `<tr>
+            <td><b>${ui.esc(t.imie_nazwisko)}</b><div class="tiny muted">${ui.esc(t.email || 'bez e-maila')} · ${ui.esc(t.przedmiot || '—')}</div></td>
+            <td>${t.rola === 'admin' ? '<span class="badge red">administrator</span>' : '<span class="badge blue">nauczyciel</span>'}</td>
+            <td class="small">${klasy} klas · ${zestawy} zest. · ${pytania} pytań</td>
+            <td class="small muted">${t.ost_logowanie ? ui.fmtAgo(t.ost_logowanie) : 'nigdy'}</td>
+            <td>
+              <button class="neu-btn square sm" data-impersonate="${t.id}" title="Otwórz jako ten nauczyciel">👁️</button>
+              <button class="neu-btn square sm" data-reset-pw="${t.id}" title="Resetuj hasło">🔑</button>
+              <button class="neu-btn square sm" data-role="${t.id}" title="Zmień rolę">🛡️</button>
+              <button class="neu-btn square sm danger" data-del-t="${t.id}" title="Usuń konto">🗑️</button>
+            </td></tr>`;
+        }).join('')}</tbody></table></div>
+      <p class="tiny muted mt-16">Hasła są solone i hashowane (SHA-256) po stronie klienta — do prawdziwego wdrożenia szkolnego przenieś logikę na serwer / Supabase Auth (patrz <b>supabase/schema.sql</b>).</p>`;
+  }
+
+  /* ---- klasy i zestawy ---- */
+  function renderClasses() {
+    const klasy = CQ.store.table('klasy').map((k) => ({
+      ...k,
+      n: CQ.Klasy.uczniowie(k.id).length,
+      t: CQ.store.byId('nauczyciele', k.nauczyciel_id),
+      z: CQ.store.where('zestawy', (z) => z.klasa_id === k.id).length,
+      s: CQ.store.where('sesje', (s) => s.klasa_id === k.id).length,
+    })).sort((a, b) => (a.t?.imie_nazwisko || '').localeCompare(b.t?.imie_nazwisko || '', 'pl') || a.nazwa.localeCompare(b.nazwa, 'pl'));
+    const zestawy = CQ.store.table('zestawy').map((z) => ({ ...z, q: CQ.Zestawy.pytania(z.id).length, t: CQ.store.byId('nauczyciele', z.nauczyciel_id) }));
+    $('#tab-klasy').innerHTML = `
+      <div class="section-title">🏫 Klasy w instalacji</div>
+      ${klasy.length ? `<div class="table-wrap"><table class="data">
+        <thead><tr><th>Klasa</th><th>Opiekun</th><th>Uczniowie</th><th>Zestawy</th><th>Gry</th><th></th></tr></thead>
+        <tbody>${klasy.map((k) => `<tr>
+          <td><b>${ui.esc(k.nazwa)}</b><div class="tiny muted">${ui.esc(k.opis || '')}</div></td>
+          <td class="small">${ui.esc(k.t?.imie_nazwisko || '—')}</td>
+          <td class="num">${k.n}</td><td class="num">${k.z}</td><td class="num">${k.s}</td>
+          <td><button class="neu-btn square sm danger" data-del-klasa="${k.id}" title="Usuń klasę">🗑️</button></td></tr>`).join('')}
+        </tbody></table></div>` : ui.empty('🏫', 'Brak klas', 'Nauczyciele muszą założyć swoje klasy.')}
+      <div class="section-title mt-24">🗂️ Zestawy pytań <span class="spacer"><span class="tiny muted">${zestawy.length} zestawów</span></span></div>
+      ${zestawy.length ? `<div class="table-wrap"><table class="data">
+        <thead><tr><th>Zestaw</th><th>Autor</th><th>Pytania</th><th></th></tr></thead>
+        <tbody>${zestawy.map((z) => `<tr>
+          <td><b>${ui.esc(z.nazwa_zestawu)}</b><div class="tiny muted">${ui.esc(z.przedmiot || '')}</div></td>
+          <td class="small">${ui.esc(z.t?.imie_nazwisko || '—')}</td>
+          <td class="num">${z.q}</td>
+          <td>${z.q === 0 ? '<button class="neu-btn square sm danger" data-del-zestaw="' + z.id + '" title="Usuń pusty zestaw">🗑️</button>' : '<span class="tiny muted">—</span>'}</td></tr>`).join('')}
+        </tbody></table></div>` : ui.empty('❓', 'Brak zestawów', 'Bank pytań jest pusty w całej instalacji.')}`;
+  }
+
+  /* ---- sesje ---- */
+  function renderSessions() {
+    const sesje = CQ.store.table('sesje').slice().sort((a, b) => String(b.utworzono).localeCompare(String(a.utworzono))).slice(0, 40);
+    $('#tab-sesje').innerHTML = `
+      <div class="section-title">🎮 Sesje gier <span class="spacer"></span>
+        <button class="neu-btn sm" data-close-stale>⏹️ Zamknij zawieszone (&gt; 6 h)</button></div>
+      ${sesje.length ? `<div class="table-wrap"><table class="data">
+        <thead><tr><th>Kod</th><th>Zestaw / klasa</th><th>Faza</th><th>Gracze</th><th>Utworzono</th><th></th></tr></thead>
+        <tbody>${sesje.map((s) => {
+          const g = CQ.Gra.gracze(s.id);
+          const z = CQ.store.byId('zestawy', s.zestaw_id);
+          const k = CQ.store.byId('klasy', s.klasa_id);
+          return `<tr>
+            <td class="mono bold">${ui.esc(s.kod)}</td>
+            <td><b>${ui.esc(z?.nazwa_zestawu || '—')}</b><div class="tiny muted">${ui.esc(k?.nazwa || 'bez klasy')} · ${CQ.TRYBY[s.tryb]?.nazwa || s.tryb}</div></td>
+            <td>${ui.statusBadge(s.status)}</td>
+            <td class="num">${g.length}</td>
+            <td class="small muted">${ui.fmtDate(s.utworzono)}</td>
+            <td><a class="neu-btn square sm" href="wyniki.html?sesja=${s.id}" title="Raport">📊</a>
+              ${s.status !== 'koniec' ? `<button class="neu-btn square sm" data-force-end="${s.id}" title="Zamknij siłą">⏹️</button>` : ''}
+              <button class="neu-btn square sm danger" data-del-sesja="${s.id}" title="Usuń">🗑️</button></td></tr>`;
+        }).join('')}</tbody></table></div>` : ui.empty('🎮', 'Brak sesji', 'Gry pojawią się, gdy nauczyciel uruchomi pierwszą.')}`;
+  }
+
+  /* ---- konserwacja ---- */
+  async function renderMaintenance() {
+    const items = await CQ.Diagnostyka.run();
+    const db = CQ.store.db;
+    $('#tab-konserwacja').innerHTML = `
+      <div class="section-title">🧰 Stan instalacji</div>
+      <div class="list">${items.map((i) => `<div class="list-item">
+        <span class="lead ${i.ok ? 'green' : 'red'}">${i.ok ? '✓' : '!'}</span>
+        <div class="body"><strong>${ui.esc(i.name)}</strong><small>${ui.esc(i.msg)}${i.hint ? ' · ' + ui.esc(i.hint) : ''}</small></div></div>`).join('')}</div>
+      <div class="row-8 wrap mt-16">
+        <button class="neu-btn sm" data-fix>🔧 Napraw relacje</button>
+        <button class="neu-btn sm" data-reindex>🔁 Przelicz XP uczniów</button>
+        <button class="neu-btn sm" data-export>⬇️ Eksport całej bazy</button>
+        <button class="neu-btn sm" data-import>⬆️ Import bazy</button>
+      </div>
+      <div class="neu-card pad-sm inset mt-24"><b class="small">📦 Rozmiar</b>
+        <div class="tiny muted mt-8">${CQ.store.storageKb()} kB · ${CQ.TABLES.map((t) => `${t}: ${db[t].length}`).join(' · ')}</div></div>
+      <div class="neu-card pad-sm danger-zone mt-16">
+        <b class="small" style="color:var(--red)">Strefa niebezpieczna</b>
+        <p class="tiny muted mt-8">Operacje poniżej dotyczą całej instalacji i nie mają cofnięcia.</p>
+        <div class="row-8 wrap mt-8">
+          <button class="neu-btn sm danger" data-seed>🌱 Nadpisz danymi demo</button>
+          <button class="neu-btn sm danger-solid" data-wipe>🧹 Skasuj wszystko</button>
+        </div>
+      </div>`;
+  }
+
+  /* ---- dziennik zdarzeń (ostatnie zapisy) ---- */
+  let log = [];
+  function renderLog() {
+    $('#tab-dziennik').innerHTML = `
+      <div class="section-title">📜 Zapisane operacje (ta sesja przeglądarki)</div>
+      ${log.length ? `<div class="log stack stack-8">${log.slice(0, 200).map((l) =>
+        `<div>${l.czas} · <b>${l.tables.join(',')}</b> · ${l.ops} operacj(i)</div>`).join('')}</div>`
+        : ui.empty('📭', 'Pusto', 'W tej karcie nie zapisano jeszcze nic od czasu otwarcia strony.') +
+          '<p class="tiny muted mt-16">Wskazówka: każda zmiana w panelu, grze albo ustawieniach pojawi się tutaj.</p>'}`;
+  }
+  CQ.store.onChange((info) => {
+    if (!info.tables || !info.tables.length) return;
+    log.unshift({ czas: new Date().toLocaleTimeString('pl-PL'), tables: info.tables, ops: info.ops || 1 });
+    if (log.length > 400) log.pop();
+    if (!$('#tab-dziennik').classList.contains('hidden')) renderLog();
+  });
+
+  /* ---- obsługa zdarzeń ---- */
+  document.addEventListener('click', async (e) => {
+    const t = e.target;
+    const tab = t.closest('[data-tab]');
+    if (tab) {
+      document.querySelectorAll('#tabs .tab-btn').forEach((b) => b.classList.toggle('active', b === tab));
+      ['nauczyciele', 'klasy', 'sesje', 'konserwacja', 'dziennik'].forEach((k) => $('#tab-' + k).classList.toggle('hidden', k !== tab.dataset.tab));
+      if (tab.dataset.tab === 'konserwacja') renderMaintenance();
+      if (tab.dataset.tab === 'dziennik') renderLog();
+      return;
+    }
+    if (t.closest('[data-add-t]')) {
+      const v = await ui.formModal('Nowe konto nauczyciela', [
+        { name: 'imie', label: 'Imię i nazwisko', required: true },
+        { name: 'email', label: 'E-mail', type: 'email' },
+        { name: 'haslo', label: 'Hasło startowe', value: 'start123', required: true },
+        { name: 'przedmiot', label: 'Przedmiot' },
+        { name: 'rola', label: 'Rola', type: 'select', options: [{ value: 'nauczyciel', label: 'nauczyciel' }, { value: 'admin', label: 'administrator' }] },
+      ], { okLabel: 'Utwórz konto' });
+      if (!v) return;
+      try {
+        const adminSesja = CQ.Auth.current();          // register() loguje nowe konto — oddamy sesję z powrotem
+        await CQ.Auth.register({ imieNazwisko: v.imie, email: v.email, haslo: v.haslo, przedmiot: v.przedmiot });
+        const utworzone = CQ.store.where('nauczyciele', (n) => CQ.normalize(n.imie_nazwisko) === CQ.normalize(v.imie))[0];
+        if (utworzone && v.rola !== 'nauczyciel') await CQ.store.update('nauczyciele', utworzone.id, { rola: v.rola });
+        await CQ.Auth._setSession(adminSesja);
+        ui.toast(`Konto gotowe — login: ${v.imie}, hasło: ${v.haslo}`, 'ok', 6000);
+        render();
+      } catch (err) { ui.toast(err.message, 'err'); }
+      return;
+    }
+    const reset = t.closest('[data-reset-pw]');
+    if (reset) {
+      const v = await ui.formModal('Reset hasła', [
+        { name: 'haslo', label: 'Nowe hasło', value: 'demo123', required: true, hint: 'Przekaż je nauczycielowi offline.' },
+      ], { okLabel: 'Ustaw hasło' });
+      if (!v) return;
+      await CQ.Auth.changePassword(reset.dataset.resetPw, v.haslo);
+      ui.toast('Hasło zresetowane.', 'ok');
+      return;
+    }
+    const role = t.closest('[data-role]');
+    if (role) {
+      const u = ui.wiersz('nauczyciele', role.dataset.role, 'konto');
+      if (!u) { render(); return; }
+      await CQ.store.update('nauczyciele', u.id, { rola: u.rola === 'admin' ? 'nauczyciel' : 'admin' });
+      ui.toast(`${u.imie_nazwisko} jest teraz: ${u.rola === 'admin' ? 'nauczyciel' : 'administrator'}`, 'ok');
+      render();
+      return;
+    }
+    const imp = t.closest('[data-impersonate]');
+    if (imp) {
+      const u = ui.wiersz('nauczyciele', imp.dataset.impersonate, 'konto');
+      if (!u) { render(); return; }
+      await CQ.Auth._setSession({ id: u.id, imie_nazwisko: u.imie_nazwisko, email: u.email, rola: 'nauczyciel', token: CQ.uid(), czas: CQ.nowISO() });
+      ui.toast('Otwieram panel jako ' + u.imie_nazwisko, 'info');
+      setTimeout(() => location.href = 'nauczyciel.html', 600);
+      return;
+    }
+    const delT = t.closest('[data-del-t]');
+    if (delT) {
+      const u = ui.wiersz('nauczyciele', delT.dataset.delT, 'konto');
+      if (!u) { render(); return; }
+      if (u.id === me.id) return ui.toast('Nie usuwaj własnego konta admina.', 'warn');
+      const v = await ui.formModal(`Usunąć konto ${u.imie_nazwisko}?`, [
+        { name: 'tryb', label: 'Co zrobić z zasobami', type: 'select', options: [{ value: 'soft', label: 'tylko konto (klasy zostaną)' }, { value: 'hard', label: 'konto + klasy + zestawy + wyniki' }], },
+        { name: 'potwierdzenie', label: 'Przepisz: USUN', required: true },
+      ], { okLabel: 'Usuń' });
+      if (!v || v.potwierdzenie.trim().toUpperCase() !== 'USUN') return;
+      if (v.tryb === 'hard') {
+        for (const k of CQ.store.where('klasy', (k) => k.nauczyciel_id === u.id)) await CQ.Klasy.remove(k.id);
+        for (const z of CQ.Zestawy.list(u.id)) await CQ.Zestawy.remove(z.id);
+      }
+      await CQ.store.remove('nauczyciele', u.id);
+      ui.toast('Konto usunięte.', 'warn');
+      render();
+      return;
+    }
+    const delK = t.closest('[data-del-klasa]');
+    if (delK) {
+      const k = ui.wiersz('klasy', delK.dataset.delKlasa, 'klasa');
+      if (!k) { render(); return; }
+      const yes = await ui.confirmBox('Usunąć klasę ' + k.nazwa + '?', 'Razem z uczniami, zestawami i historią gier tej klasy.', { ok: 'Usuń', danger: true });
+      if (yes) { await CQ.Klasy.remove(k.id); ui.toast('Usunięto klasę.', 'warn'); render(); }
+      return;
+    }
+    const delZ = t.closest('[data-del-zestaw]');
+    if (delZ) { await CQ.Zestawy.remove(delZ.dataset.delZestaw); ui.toast('Pusty zestaw usunięty.', 'ok'); render(); return; }
+    if (t.closest('[data-close-stale]')) {
+      const n = await CQ.Gra.zamknijStareSesje(6);
+      ui.toast(n ? `Zamknięto ${n} sesji.` : 'Brak zawieszonych sesji.', n ? 'ok' : 'info');
+      render();
+      return;
+    }
+    const fe = t.closest('[data-force-end]');
+    if (fe) {
+      const yes = await ui.confirmBox('Zamknąć sesję?', 'Nauczyciel zobaczy wynik, ale nie będzie można już odpowiadać.');
+      if (yes) { await CQ.Gra.finish(fe.dataset.forceEnd); ui.toast('Sesja zamknięta.', 'ok'); render(); }
+      return;
+    }
+    const delS = t.closest('[data-del-sesja]');
+    if (delS) {
+      const yes = await ui.confirmBox('Usunąć sesję?', 'Usunięte zostaną odpowiedzi i gracze. XP w dziennikach uczniów zostaje.', { ok: 'Usuń', danger: true });
+      if (yes) { await CQ.Gra.usun(delS.dataset.delSesja); ui.toast('Usunięto.', 'warn'); render(); }
+      return;
+    }
+    if (t.closest('[data-fix]')) {
+      const n = await CQ.Diagnostyka.napraw();
+      ui.toast(n ? `Naprawiono: usunięto ${n} rekordów.` : 'Nie znaleziono uszkodzeń.', n ? 'ok' : 'info');
+      renderMaintenance();
+      return;
+    }
+    if (t.closest('[data-reindex]')) {
+      let zmienione = 0;
+      for (const u of CQ.store.table('uczniowie')) {
+        const suma = CQ.store.where('wpisy_xp', (w) => w.uczen_id === u.id).reduce((a, b) => a + (b.kwota || 0), 0);
+        if (suma !== (u.xp || 0)) { await CQ.store.update('uczniowie', u.id, { xp: suma }); zmienione++; }
+      }
+      ui.toast(zmienione ? `Przeliczono XP u ${zmienione} uczniów.` : 'Wszystko się zgadza.', zmienione ? 'ok' : 'info');
+      render();
+      return;
+    }
+    if (t.closest('[data-export]')) { ui.download('classquest-instalacja.json', CQ.Dane.export()); ui.toast('Pobrano kopię całej instalacji.', 'ok'); return; }
+    if (t.closest('[data-import]')) {
+      const input = ui.el('input', { type: 'file', accept: '.json' });
+      input.addEventListener('change', async () => {
+        try { await CQ.Dane.import(await input.files[0].text()); ui.toast('Baza wczytana.', 'ok'); setTimeout(() => location.reload(), 800); }
+        catch (err) { ui.toast('Import nieudany: ' + err.message, 'err'); }
+      });
+      input.click();
+      return;
+    }
+    if (t.closest('[data-seed]')) {
+      const yes = await ui.confirmBox('Nadpisać danymi demo?', 'Bieżące konta, klasy i wyniki znikną.', { ok: 'Nadpisz', danger: true });
+      if (yes) { await CQ.Dane.resetDemo(); await CQ.Auth.login({ login: 'admin@classquest.pl', haslo: 'admin123' }); ui.toast('Wgrano demo.', 'ok'); setTimeout(() => location.reload(), 700); }
+      return;
+    }
+    if (t.closest('[data-wipe]')) {
+      const v = await ui.formModal('Skasować całą instalację?', [
+        { name: 'potwierdzenie', label: 'Przepisz: SKASUJE', required: true, hint: 'Operacja nieodwracalna.' },
+      ], { okLabel: 'Skasuj' });
+      if (!v || v.potwierdzenie.trim().toUpperCase() !== 'SKASUJE') return;
+      await CQ.Dane.wipe();
+      ui.toast('Instalacja wyczyszczona.', 'warn');
+      setTimeout(() => location.href = 'admin-logowanie.html', 800);
+      return;
+    }
+    if (t.closest('[data-csv]')) {
+      const rows = CQ.store.table('nauczyciele').map((n) => [n.imie_nazwisko, n.email || '', n.rola, n.przedmiot || ''].map((x) => `"${String(x).replace(/"/g, '""')}"`).join(';'));
+      ui.download('konta.csv', ['osoba;email;rola;przedmiot', ...rows].join('\n'), 'text/csv');
+      return;
+    }
+  });
+
+  function render() { renderKpi(); renderTeachers(); renderClasses(); renderSessions(); }
+  ui.live(render);
+  render();
+</script>
+</body>
+</html>

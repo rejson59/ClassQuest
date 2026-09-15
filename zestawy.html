@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bank pytań — ClassQuest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <style>
+    .set-card { cursor: pointer; }
+    .set-card.on { box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light); }
+    .q-row { display: grid; grid-template-columns: 34px 1fr auto; gap: 14px; align-items: center; padding: 14px 16px; border-radius: 18px;
+      box-shadow: 6px 6px 13px var(--shadow-dark-soft), -6px -6px 13px var(--shadow-light); }
+    .q-row .idx { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 12px; font-weight: 800; background: var(--blue-soft); color: var(--blue); }
+    .q-opts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .q-opts span { font-size: .78rem; font-weight: 700; padding: 3px 9px; border-radius: 9px; background: var(--bg-deep); color: var(--text-muted); }
+    .q-opts span.good { background: var(--green-soft); color: var(--green); }
+    .opt-row { display: grid; grid-template-columns: 42px 1fr 46px; gap: 10px; align-items: center; }
+    .opt-row .letter { display: grid; place-items: center; height: 40px; border-radius: 13px; color: #fff; font-weight: 800; }
+    .opt-row[data-l="A"] .letter { background: #2563eb; } .opt-row[data-l="B"] .letter { background: #e11d48; }
+    .opt-row[data-l="C"] .letter { background: #f59e0b; } .opt-row[data-l="D"] .letter { background: #10b981; }
+    .opt-row input[type=radio] { accent-color: var(--green); width: 20px; height: 20px; cursor: pointer; }
+    .mini-stat { text-align:center; padding: 10px 6px; border-radius: 14px; box-shadow: inset 4px 4px 8px var(--shadow-dark-soft), inset -4px -4px 8px var(--shadow-light); }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="page-head row-between wrap">
+    <div><h1>Bank pytań</h1><p>Zestawy, którymi grasz na lekcji. Pytania zamknięte, prawda/fałsz i otwarte — z wyjaśnieniem pokazywanym po odpowiedzi.</p></div>
+    <div class="row-8 wrap">
+      <span id="mode-slot"></span>
+      <button class="neu-btn sm" id="import">⬆️ Importuj JSON</button>
+      <button class="neu-btn sm primary" id="new-set">➕ Nowy zestaw</button>
+    </div>
+  </div>
+
+  <div class="split-sidebar">
+    <div class="stack stack-12">
+      <input class="neu-input" id="search" placeholder="Szukaj w zestawach i pytaniach…" autocomplete="off">
+      <div class="stack stack-12" id="set-list"></div>
+    </div>
+    <div class="neu-card" id="set-panel"></div>
+  </div>
+</div>
+
+<script src="assets/js/store.js"></script>
+<script src="assets/js/ui.js"></script>
+<script type="module">
+  const { ui } = CQ;
+  const $ = (s) => document.querySelector(s);
+  const me = await ui.bootTeacher({ active: 'zestawy' });
+  if (!me) throw new Error('brak dostępu');
+  await CQ.store.ready();
+  $('#mode-slot').innerHTML = ui.modeChip();
+
+  let selected = new URLSearchParams(location.search).get('zestaw') || localStorage.getItem('cq_zestaw') || null;
+  let filter = '';
+
+  const zestawy = () => CQ.Zestawy.details(me.id);
+
+  function pick() {
+    const all = zestawy();
+    if (!all.some((z) => z.id === selected)) selected = all[0] ? all[0].id : null;
+    return all.find((z) => z.id === selected) || null;
+  }
+
+  function renderList() {
+    const q = CQ.normalize(filter || '');
+    let all = zestawy();
+    if (q) all = all.filter((z) =>
+      CQ.normalize(z.nazwa_zestawu).includes(q) || CQ.normalize(z.przedmiot).includes(q) ||
+      z.pytania.some((p) => CQ.normalize(p.tresc).includes(q)));
+    $('#set-list').innerHTML = all.length ? all.map((z) => `
+      <div class="neu-card pad-sm set-card ${z.id === selected ? 'on' : ''}" data-set="${z.id}">
+        <div class="row-between"><b>${ui.esc(z.nazwa_zestawu)}</b><span class="badge blue">${z.pytania.length}</span></div>
+        <div class="tiny muted mt-8">${ui.esc(z.przedmiot || 'bez przedmiotu')}${z.klasa ? ' · ' + ui.esc(z.klasa.nazwa) : ''} · ${z.grane ? 'grane ' + z.grane + '×' : 'jeszcze nie grane'}</div>
+        <div class="q-opts mt-8">${typySummary(z.pytania)}</div>
+      </div>`).join('')
+      : ui.empty('🔎', filter ? 'Nic nie pasuje do szukania' : 'Bank jest pusty',
+        filter ? 'Zmień frazę wyszukiwania.' : 'Utwórz zestaw albo wgruj gotowy plik JSON.',
+        '<button class="neu-btn sm primary" data-new-set>Utwórz zestaw</button>');
+  }
+
+  function typySummary(qs) {
+    const c = { abcd: 0, pf: 0, otwarte: 0 };
+    qs.forEach((q) => c[q.typ] = (c[q.typ] || 0) + 1);
+    return [['abcd', 'A/B/C/D'], ['pf', 'P/F'], ['otwarte', 'otwarte']].filter(([k]) => c[k])
+      .map(([k, label]) => `<span>${label} ${c[k]}</span>`).join('');
+  }
+
+  function renderPanel() {
+    const z = pick();
+    if (!z) { $('#set-panel').innerHTML = ui.empty('🗂️', 'Brak zestawu do pokazania', 'Wybierz go z listy po lewej albo utwórz nowy.'); return; }
+    const qs = z.pytania;
+    const srCzas = qs.length ? Math.round(qs.reduce((a, b) => a + (b.czas || 20), 0) / qs.length) : 0;
+    const maxPkt = qs.reduce((a, b) => a + (b.punkty || 100), 0);
+    $('#set-panel').innerHTML = `
+      <div class="row-between wrap">
+        <div><div class="section-title" style="margin-bottom:2px">🗂️ ${ui.esc(z.nazwa_zestawu)}</div>
+          <div class="tiny muted">${ui.esc(z.opis || 'bez opisu')}</div></div>
+        <div class="row-8 wrap">
+          <button class="neu-btn sm ghost" data-edit-set title="Ustawienia zestawu">✏️ Edytuj</button>
+          <button class="neu-btn sm" data-dup title="Duplikuj">🆕</button>
+          <button class="neu-btn sm" data-export title="Pobierz JSON">⬇️</button>
+          <button class="neu-btn sm danger" data-del-set title="Usuń zestaw">🗑️</button>
+        </div>
+      </div>
+
+      <div class="grid-4 mt-16" style="gap:10px">
+        <div class="mini-stat"><div class="value" style="font-size:1.3rem;font-weight:800">${qs.length}</div><div class="tiny muted">pytań</div></div>
+        <div class="mini-stat"><div class="value" style="font-size:1.3rem;font-weight:800">${srCzas}s</div><div class="tiny muted">śr. czas</div></div>
+        <div class="mini-stat"><div class="value" style="font-size:1.3rem;font-weight:800">${maxPkt}</div><div class="tiny muted">pkt do wzięcia</div></div>
+        <div class="mini-stat"><div class="value" style="font-size:1.3rem;font-weight:800">${qs.filter((p) => !p.wytlumaczenie).length}</div><div class="tiny muted">bez wyjaśnienia</div></div>
+      </div>
+
+      <div class="row-8 wrap mt-16">
+        <button class="neu-btn primary sm" data-add-q>➕ Dodaj pytanie</button>
+        <button class="neu-btn sm" data-paste>📋 Wklej pytania</button>
+        <a class="neu-btn sm" href="gra.html?trening=${z.id}" target="_blank" rel="noopener">🧘 Sprawdź treningiem</a>
+        <span class="grow"></span>
+        <span class="tiny muted">szacowany czas gry: <b>${Math.max(1, Math.round(qs.length * (srCzas + 6) / 60))} min</b></span>
+      </div>
+
+      <div class="list mt-16">${qs.length ? qs.map((p, i) => `
+        <div class="q-row">
+          <span class="idx">${i + 1}</span>
+          <div style="min-width:0">
+            <b>${ui.esc(p.tresc)}</b>
+            <div class="q-opts">${optionsPreview(p)}</div>
+            <div class="tiny muted mt-8">${badgeTyp(p)} · ${p.punkty || 100} pkt · ${p.czas || 20}s${p.wytlumaczenie ? ' · ma wyjaśnienie' : ''}</div>
+          </div>
+          <div class="row-8" style="flex-wrap:wrap;justify-content:flex-end">
+            <button class="neu-btn square sm" data-up="${p.id}" title="W górę" ${i === 0 ? 'disabled' : ''}>↑</button>
+            <button class="neu-btn square sm" data-down="${p.id}" title="W dół" ${i === qs.length - 1 ? 'disabled' : ''}>↓</button>
+            <button class="neu-btn square sm" data-edit-q="${p.id}" title="Edytuj">✏️</button>
+            <button class="neu-btn square sm danger" data-del-q="${p.id}" title="Usuń">🗑️</button>
+          </div>
+        </div>`).join('') : ui.empty('❓', 'Ten zestaw nie ma pytań', 'Dodaj pierwsze pytanie albo wklej gotową listę.')}</div>`;
+  }
+
+  function badgeTyp(p) {
+    const map = { abcd: ['A/B/C/D', 'blue'], pf: ['prawda/fałsz', 'green'], otwarte: ['otwarte', 'amber'] };
+    const [label, cls] = map[p.typ] || ['pytanie', ''];
+    return `<span class="badge ${cls}">${label}</span>`;
+  }
+  function optionsPreview(p) {
+    if (p.typ === 'otwarte') return `<span class="good">✓ ${ui.esc(p.poprawna_odp.split(';').slice(0, 2).join(' / '))}</span>`;
+    const opts = [['A', p.opcja_a], ['B', p.opcja_b], ['C', p.opcja_c], ['D', p.opcja_d]].filter(([, v]) => v);
+    return opts.map(([k, v]) => `<span class="${k === p.poprawna_opcja ? 'good' : ''}">${k}. ${ui.esc(v)}</span>`).join('');
+  }
+
+  /* ---- edytor pytania ---- */
+  function questionModal(existing) {
+    const p = existing || { typ: 'abcd', punkty: 100, czas: 20, opcja_a: '', opcja_b: '', opcja_c: '', opcja_d: '', poprawna_opcja: 'A', poprawna_odp: '', tresc: '', wytlumaczenie: '' };
+    const form = ui.el('form', { class: 'stack stack-12' });
+    form.innerHTML = `
+      <div class="field"><label class="neu-label">Typ pytania</label>
+        <div class="tabs" id="typ-tabs">
+          <button type="button" class="tab-btn" data-t="abcd">A/B/C/D</button>
+          <button type="button" class="tab-btn" data-t="pf">Prawda / Fałsz</button>
+          <button type="button" class="tab-btn" data-t="otwarte">Otwarte</button>
+        </div></div>
+      <div class="field"><label class="neu-label" for="q-tresc">Treść pytania</label>
+        <textarea class="neu-textarea" id="q-tresc" rows="2" placeholder="np. Ile wynosi 3/4 z 20?" required>${ui.esc(p.tresc)}</textarea></div>
+      <div id="opts-block" class="stack stack-8"></div>
+      <div class="field"><label class="neu-label" for="q-why">Wyjaśnienie po odpowiedzi (opcjonalnie)</label>
+        <textarea class="neu-textarea" id="q-why" rows="2" placeholder="Dlaczego taka odpowiedź? Pojawi się na tablicy i u ucznia.">${ui.esc(p.wytlumaczenie || '')}</textarea></div>
+      <div class="grid-2" style="gap:10px">
+        <div class="field"><label class="neu-label" for="q-pk">Punkty bazowe</label><input class="neu-input" id="q-pk" type="number" min="10" max="1000" step="10" value="${p.punkty || 100}"></div>
+        <div class="field"><label class="neu-label" for="q-cz">Czas (s)</label><input class="neu-input" id="q-cz" type="number" min="5" max="120" value="${p.czas || 20}"></div>
+      </div>`;
+
+    let typ = p.typ;
+    const optsBlock = form.querySelector('#opts-block');
+
+    function paintOpts() {
+      form.querySelectorAll('#typ-tabs .tab-btn').forEach((b) => b.classList.toggle('active', b.dataset.t === typ));
+      if (typ === 'otwarte') {
+        optsBlock.innerHTML = `<div class="field"><label class="neu-label" for="q-open">Poprawne odpowiedzi (oddziel średnikiem)</label>
+          <input class="neu-input" id="q-open" value="${ui.esc(p.poprawna_odp || '')}" placeholder="15;piętnaście">
+          <div class="tiny muted mt-8">Wielkość liter i polskie znaki nie grają roli; wystarczy, że odpowiedź zawiera podany tekst.</div></div>`;
+        return;
+      }
+      const list = typ === 'pf' ? [['A', 'Prawda'], ['B', 'Fałsz']] : [['A', p.opcja_a, 'A'], ['B', p.opcja_b, 'B'], ['C', p.opcja_c, 'C'], ['D', p.opcja_d, 'D']];
+      optsBlock.innerHTML = list.map(([k, v]) => `
+        <div class="opt-row" data-l="${k}">
+          <span class="letter">${k}</span>
+          ${typ === 'pf'
+            ? `<input class="neu-input" value="${ui.esc(v)}" disabled>`
+            : `<input class="neu-input" data-k="${k}" value="${ui.esc(v || '')}" placeholder="Odpowiedź ${k}" ${k === 'A' || k === 'B' ? 'required' : ''}>`}
+          <input type="radio" name="poprawna" value="${k}" title="Ustaw jako poprawną" ${p.poprawna_opcja === k ? 'checked' : ''}>
+        </div>`).join('') + '<div class="tiny muted">Kropka po prawej = to jest poprawna odpowiedź.</div>';
+    }
+    paintOpts();
+
+    form.querySelector('#typ-tabs').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-t]');
+      if (!b) return;
+      typ = b.dataset.t;
+      if (typ === 'pf') { form.querySelector('[data-k="C"]')?.remove(); }
+      paintOpts();
+    });
+
+    ui.openModal({
+      title: existing ? 'Edytuj pytanie' : 'Nowe pytanie',
+      size: 'wide',
+      body: form,
+      actions: [
+        { label: 'Anuluj', class: 'ghost', onClick: ({ close }) => close() },
+        { label: existing ? 'Zapisz zmiany' : 'Dodaj pytanie', class: 'primary', onClick: async ({ close }) => {
+          if (!form.reportValidity()) return;
+          const get = (k) => form.querySelector(`[data-k="${k}"]`)?.value || '';
+          const data = {
+            tresc: form.querySelector('#q-tresc').value,
+            typ,
+            opcja_a: typ === 'pf' ? 'Prawda' : get('A'),
+            opcja_b: typ === 'pf' ? 'Fałsz' : get('B'),
+            opcja_c: typ === 'abcd' ? get('C') : '',
+            opcja_d: typ === 'abcd' ? get('D') : '',
+            poprawna_opcja: form.querySelector('input[name=poprawna]:checked')?.value || 'A',
+            poprawna_odp: typ === 'otwarte' ? (form.querySelector('#q-open')?.value || '') : '',
+            punkty: form.querySelector('#q-pk').value,
+            czas: form.querySelector('#q-cz').value,
+            wytlumaczenie: form.querySelector('#q-why').value,
+            kolejnosc: existing ? existing.kolejnosc : undefined,
+          };
+          try {
+            await CQ.Zestawy.saveQuestion(selected, data, existing ? existing.id : null);
+            close();
+            ui.toast(existing ? 'Pytanie zaktualizowane.' : 'Pytanie dodane.', 'ok');
+            render();
+          } catch (err) { ui.toast(err.message, 'err'); }
+        } },
+      ],
+    });
+  }
+
+  /* ---- wklejanie pytań ---- */
+  function pasteModal() {
+    const example = 'Ile to 7 × 8?|54|56|48|64|B\nZiemia krąży wokół Słońca.|Prawda|Fałsz|||A\nStolica Polski to|Warszawa';
+    const form = ui.el('form', { class: 'stack stack-12' });
+    form.innerHTML = `
+      <p class="small muted">Jedno pytanie w linii, pola rozdzielone znakiem <b>|</b>:
+        <code>treść|A|B|C|D|poprawna</code>. Bez C i D to prawda/fałsz, sama treść + ostatnie pole = pytanie otwarte.</p>
+      <textarea class="neu-textarea" id="paste-box" rows="8" placeholder="${ui.esc(example)}" style="font-family:monospace"></textarea>
+      <div class="tiny muted" id="paste-info"></div>`;
+    const info = form.querySelector('#paste-info');
+    form.querySelector('#paste-box').addEventListener('input', (e) => {
+      const n = e.target.value.split('\n').filter((l) => l.trim()).length;
+      info.textContent = n ? `Rozpoznaję ${n} pytań.` : '';
+    });
+    ui.openModal({
+      title: 'Wklej pytania do zestawu',
+      body: form,
+      actions: [
+        { label: 'Anuluj', class: 'ghost', onClick: ({ close }) => close() },
+        { label: 'Dodaj', class: 'primary', onClick: async ({ close }) => {
+          const lines = form.querySelector('#paste-box').value.split('\n').map((l) => l.trim()).filter(Boolean);
+          let dodane = 0;
+          const ile = CQ.Zestawy.pytania(selected).length;
+          for (const [i, line] of lines.entries()) {
+            const [tresc, a, b, c, d, poprawna] = line.split('|').map((x) => (x || '').trim());
+            if (!tresc) continue;
+            const data = { tresc, punkty: 100, czas: 20, kolejnosc: ile + i + 1 };
+            if (!a && !b) { data.typ = 'otwarte'; data.poprawna_odp = poprawna || d || c || b || a || ''; if (!data.poprawna_odp) continue; }
+            else if (!c && !d) { data.typ = 'pf'; data.opcja_a = a; data.opcja_b = b || 'Fałsz'; data.poprawna_opcja = /^(A|prawda|tak)$/i.test(poprawna) ? 'A' : /^(B|fałsz|falsz|nie)$/i.test(poprawna) ? 'B' : (poprawna || 'A'); if (data.poprawna_opcja === 'A' && /^f/i.test(b)) data.poprawna_opcja = 'B'; }
+            else { data.typ = 'abcd'; data.opcja_a = a; data.opcja_b = b; data.opcja_c = c; data.opcja_d = d; data.poprawna_opcja = (poprawna || 'A').slice(0, 1).toUpperCase(); }
+            try { await CQ.Zestawy.saveQuestion(selected, data); dodane++; } catch (e) { /* pomiń wadliwe */ }
+          }
+          close();
+          ui.toast(dodane ? `Dodano ${dodane} pytań.` : 'Nie udało się rozpoznać żadnego pytania.', dodane ? 'ok' : 'warn');
+          render();
+        } },
+      ],
+    });
+  }
+
+  /* ---- akcje ---- */
+  async function nowyZestaw() {
+    const klasy = CQ.Klasy.list(me.id);
+    const v = await ui.formModal('Nowy zestaw pytań', [
+      { name: 'nazwa_zestawu', label: 'Nazwa', placeholder: 'np. Matma: ułamki — sprawdzian 3', required: true },
+      { name: 'przedmiot', label: 'Przedmiot', placeholder: 'np. matematyka' },
+      { name: 'klasa_id', label: 'Klasa (opcjonalnie)', type: 'select', options: [{ value: '', label: '— wspólny —' }, ...klasy.map((k) => ({ value: k.id, label: k.nazwa }))] },
+      { name: 'opis', label: 'Opis / notatka dla siebie', type: 'textarea', rows: 2 },
+    ], { okLabel: 'Utwórz' });
+    if (!v) return;
+    const z = await CQ.Zestawy.create(me.id, v);
+    selected = z.id;
+    localStorage.setItem('cq_zestaw', z.id);
+    render();
+    questionModal(null);
+  }
+
+  async function edytujZestaw() {
+    const z = pick();
+    const klasy = CQ.Klasy.list(me.id);
+    const v = await ui.formModal('Ustawienia zestawu', [
+      { name: 'nazwa_zestawu', label: 'Nazwa', value: z.nazwa_zestawu, required: true },
+      { name: 'przedmiot', label: 'Przedmiot', value: z.przedmiot },
+      { name: 'klasa_id', label: 'Klasa', type: 'select', options: [{ value: '', label: '— wspólny —' }, ...klasy.map((k) => ({ value: k.id, label: k.nazwa })),], value: z.klasa_id || '' },
+      { name: 'opis', label: 'Opis', type: 'textarea', rows: 2, value: z.opis },
+    ], { okLabel: 'Zapisz' });
+    if (!v) return;
+    await CQ.Zestawy.update(z.id, v);
+    ui.toast('Zapisano.', 'ok');
+    render();
+  }
+
+  document.addEventListener('click', async (e) => {
+    const t = e.target;
+    const card = t.closest('[data-set]');
+    if (card) { selected = card.dataset.set; localStorage.setItem('cq_zestaw', selected); render(); return; }
+    if (t.closest('[data-new-set], #new-set')) return nowyZestaw();
+    if (t.closest('[data-edit-set]')) return edytujZestaw();
+    if (t.closest('[data-add-q]')) return questionModal(null);
+    if (t.closest('[data-paste]')) return pasteModal();
+    if (t.closest('[data-dup]')) { const z = pick(); const k = await CQ.Zestawy.duplicate(z.id, me.id); selected = k.id; ui.toast('Utworzono kopię zestawu.', 'ok'); render(); return; }
+    if (t.closest('[data-del-set]')) {
+      const z = pick();
+      const yes = await ui.confirmBox('Usunąć zestaw?', `<b>${ui.esc(z.nazwa_zestawu)}</b> i ${z.pytania.length} pytań znikną. Rozegrane gry zachowają raport.`, { ok: 'Usuń', danger: true });
+      if (!yes) return;
+      await CQ.Zestawy.remove(z.id);
+      selected = null;
+      render();
+      return;
+    }
+    if (t.closest('[data-export]')) {
+      const z = pick();
+      ui.download(`zestaw-${z.nazwa_zestawu.replace(/[^\w-]+/g, '_')}.json`, JSON.stringify(await CQ.Zestawy.exportJson(z.id), null, 2));
+      ui.toast('Pobrano plik zestawu.', 'ok');
+      return;
+    }
+    const up = t.closest('[data-up]'), down = t.closest('[data-down]');
+    if (up) return CQ.Zestawy.moveQuestion(up.dataset.up, -1).then(render);
+    if (down) return CQ.Zestawy.moveQuestion(down.dataset.down, 1).then(render);
+    const edit = t.closest('[data-edit-q]');
+    if (edit) { const q = ui.wiersz('pytania', edit.dataset.editQ, 'pytanie'); if (q) questionModal(q); return; }
+    const del = t.closest('[data-del-q]');
+    if (del) {
+      const q = ui.wiersz('pytania', del.dataset.delQ, 'pytanie');
+      if (!q) { render(); return; }
+      const yes = await ui.confirmBox('Usunąć pytanie?', ui.esc(q.tresc), { ok: 'Usuń', danger: true });
+      if (yes) { await CQ.store.remove('pytania', q.id); ui.toast('Pytanie usunięte.', 'warn'); render(); }
+      return;
+    }
+  });
+
+  $('#search').addEventListener('input', (e) => { filter = e.target.value; renderList(); });
+  $('#import').addEventListener('click', () => {
+    const input = ui.el('input', { type: 'file', accept: 'application/json,.json' });
+    input.addEventListener('change', async () => {
+      try {
+        const text = await input.files[0].text();
+        const out = await CQ.Zestawy.importJson(me.id, JSON.parse(text));
+        selected = out.zestaw.id;
+        ui.toast(`Zaimportowano zestaw (${out.liczba} pytań).`, 'ok');
+        render();
+      } catch (err) { ui.toast('Import nieudany: ' + err.message, 'err'); }
+    });
+    input.click();
+  });
+
+  function render() { renderList(); renderPanel(); }
+  ui.live(render);
+  render();
+</script>
+</body>
+</html>

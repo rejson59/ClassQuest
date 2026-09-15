@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pomoc i instrukcja — ClassQuest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <style>
+    .help-wrap { max-width: 980px; margin: 0 auto; padding: 0 20px 80px; }
+    .step { display: grid; grid-template-columns: 42px 1fr; gap: 16px; align-items: start; }
+    .step .n { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 15px; font-weight: 800; background: var(--blue-soft); color: var(--blue); }
+    .toc { position: sticky; top: calc(var(--header-h) + 14px); }
+    .toc a { display: block; padding: 6px 10px; border-radius: 10px; font-weight: 700; font-size: .87rem; color: var(--text-muted); }
+    .toc a:hover { color: var(--blue); background: var(--blue-soft); }
+    code { background: var(--bg-deep); padding: 2px 7px; border-radius: 7px; font-weight: 700; font-size: .87em; }
+    pre { background: var(--bg-deep); padding: 16px; border-radius: 16px; overflow-x: auto; box-shadow: inset 4px 4px 9px var(--shadow-dark-soft); font-size: .82rem; }
+    table.map { width: 100%; border-collapse: collapse; }
+    table.map td { padding: 9px 10px; border-bottom: 1px solid var(--bg-deep); font-size: .88rem; vertical-align: top; }
+    table.map td:first-child { width: 165px; font-weight: 800; }
+  </style>
+</head>
+<body>
+<div class="container" style="padding-bottom:0">
+  <div class="page-head row-between wrap">
+    <div><h1>📖 Pomoc</h1><p>Wszystko, co trzeba wiedzieć, żeby wejść na lekcję z ClassQuest — i co robić, gdy coś nie działa.</p></div>
+    <div class="row-8"><a class="neu-btn sm" href="index.html">Start</a><a class="neu-btn sm primary" href="nauczyciel.html">Do panelu</a></div>
+  </div>
+</div>
+
+<div class="help-wrap">
+  <div class="split-sidebar" style="grid-template-columns: 220px 1fr">
+    <nav class="neu-card pad-sm toc">
+      <b class="small">Spis treści</b>
+      <div class="mt-8">
+        <a href="#start">Lekcja w 5 krokach</a>
+        <a href="#tryby">Tryby i punktacja</a>
+        <a href="#strony">Mapa stron</a>
+        <a href="#dane">Gdzie są dane</a>
+        <a href="#serwer">Serwer klasy</a>
+        <a href="#supabase">Supabase</a>
+        <a href="#awarie">Awarie i obejścia</a>
+        <a href="#skroty">Skróty klawiszy</a>
+      </div>
+    </nav>
+
+    <div class="stack stack-24">
+      <section class="neu-card" id="start">
+        <h2 style="font-size:1.3rem">Lekcja w 5 krokach</h2>
+        <div class="stack stack-16 mt-16">
+          <div class="step"><span class="n">1</span><div><b>Przygotuj klasę</b>
+            <p class="small muted">W „Klasy” załóż klasę i wklej listę uczniów z dziennika (jedna osoba w linii, numery mile widziane). Bez listy też zagracie — po prostu XP nie będzie się zapisywać do dziennika.</p></div></div>
+          <div class="step"><span class="n">2</span><div><b>Zbuduj bank pytań</b>
+            <p class="small muted">W „Bank pytań” utwórz zestaw i dodaj pytania: A/B/C/D, prawda/fałsz albo otwarte. Najszybciej: przycisk „Wklej pytania” i format <code>treść|A|B|C|D|poprawna</code>.</p></div></div>
+          <div class="step"><span class="n">3</span><div><b>Uruchom grę</b>
+            <p class="small muted">W panelu wybierz klasę, zestaw, tryb i czas na pytanie → „Uruchom grę”. ClassQuest wylosuje 6-cyfrowy kod pokoju.</p></div></div>
+          <div class="step"><span class="n">4</span><div><b>Pokaż tablicę, niech klasa dołącza</b>
+            <p class="small muted">Otwórz „Tablica” na projektorze. Uczniowie wchodzą na adres gry i wpisują kod — wybierają siebie z listy klasy i awatar. START w panelu uruchamia pierwsze pytanie.</p></div></div>
+          <div class="step"><span class="n">5</span><div><b>Rozlicz lekcję</b>
+            <p class="small muted">Po ostatnim pytaniu kliknij „Koniec gry” — punkty zamienią się na XP w dzienniku klasy. W „Wyniki” zobaczysz, które pytanie było najtrudniejsze, i pobierzesz CSV.</p></div></div>
+        </div>
+        <div class="neu-card inset pad-sm mt-16 small">
+          <b>Chcesz zobaczyć to w minutę?</b> Dane demonstracyjne mają już klasę 5A, pięć zestawów i grę czekającą w lobby z kodem <code>246810</code>.
+          Zaloguj się jako <code>Anna Kowalczyk / demo123</code>, otwórz tablicę w drugiej karcie i kliknij Start w panelu.
+        </div>
+      </section>
+
+      <section class="neu-card" id="tryby">
+        <h2 style="font-size:1.3rem">Tryby i punktacja</h2>
+        <div class="grid-2 mt-16" style="gap:14px">
+          <div class="neu-card pad-sm flat"><b>🎯 Klasyczny</b><p class="small muted mt-8">Pełen zestaw pytań, czas liczony na każde pytanie, punkty za poprawność i tempo.</p></div>
+          <div class="neu-card pad-sm flat"><b>⚡ Ekspres</b><p class="small muted mt-8">Do 10 pytań po 8 sekund, większy bonus za czas i mocniejsza premia za serię. Dobre na rozgrzewkę.</p></div>
+          <div class="neu-card pad-sm flat"><b>🤝 Drużynowy</b><p class="small muted mt-8">Klasa dzieli się na 4 drużyny; na tablicy liczymy wynik zespołu, a nie jednostki.</p></div>
+          <div class="neu-card pad-sm flat"><b>🧘 Trening solo</b><p class="small muted mt-8">Uczeń klika zestaw w swojej strefie i ćwiczy bez licznika i rankingu. Nie zmienia XP.</p></div>
+        </div>
+        <div class="mt-16 small">
+          <p><b>Wzór punktacji:</b> <code>punkty bazowe × (trudność pytania / 100) + bonus za pozostały czas</code>, całość ×
+          <code>1 + 0,08 × długość serii</code> (w ekspresie 0,12), zaokrąglone do dziesiątek. Błędna odpowiedź = 0 pkt.</p>
+          <p class="mt-8"><b>Zamiana na XP:</b> po zakończeniu gry uczeń dostaje <code>≈ punkty / 1000</code> XP,
+          plus 15/10/5 XP za podium i +5 XP dla zwycięskiej drużyny. Wartości bazowe ustawisz w „Ustawienia”.</p>
+          <p class="mt-8"><b>Poziomy:</b> co 400 XP (+ Żółtodziób, Uczeń, Odkrywca, Zadaniowiec, Ekspert, Mistrz…). Liczone z sumy XP, nie z jednej gry.</p>
+        </div>
+      </section>
+
+      <section class="neu-card" id="strony">
+        <h2 style="font-size:1.3rem">Mapa stron</h2>
+        <table class="map mt-16">
+          <tr><td><code>index.html</code></td><td>Wybór profilu: nauczyciel / uczeń / administrator + skrót „mam kod”.</td></tr>
+          <tr><td><code>logowanie.html</code></td><td>Logowanie i rejestracja nauczyciela (login = imię i nazwisko albo e-mail).</td></tr>
+          <tr><td><code>nauczyciel.html</code></td><td>Panel prowadzenia lekcji: sterowanie grą, kod pokoju, lista graczy, ranking klasy, zgłoszenia XP.</td></tr>
+          <tr><td><code>klasy.html</code></td><td>Klasy, listy uczniów, poziomy, księga XP, eksport CSV, wklejanie list z dziennika.</td></tr>
+          <tr><td><code>zestawy.html</code></td><td>Bank pytań: edytor trzech typów, kolejność, wyjaśnienia, import/eksport JSON, wklejanie pytań.</td></tr>
+          <tr><td><code>tablica.html</code></td><td>Widok na projektor: kod, pytanie, licznik, rozkład odpowiedzi, podium + konfetti.</td></tr>
+          <tr><td><code>gra.html</code></td><td>Ekran ucznia: dołączanie kodem, odpowiadanie, omówienie, wynik końcowy i zgłoszenie pracy.</td></tr>
+          <tr><td><code>uczen.html</code></td><td>Strefa ucznia: awatar, poziom, historia gier, trening solo, wysyłanie zgłoszeń.</td></tr>
+          <tr><td><code>wyniki.html</code></td><td>Raporty po grach: klasyfikacja, statystyki pytań, rozkład odpowiedzi, CSV i wydruk.</td></tr>
+          <tr><td><code>ustawienia.html</code></td><td>Tryb danych, domyślne parametry punktacji, diagnostyka, kopia i reset.</td></tr>
+          <tr><td><code>admin.html</code></td><td>Administracja: konta, zasoby, sesje, konserwacja, dziennik zapisów.</td></tr>
+        </table>
+      </section>
+
+      <section class="neu-card" id="dane">
+        <h2 style="font-size:1.3rem">Gdzie mieszkają dane (i czy to wystarczy)</h2>
+        <div class="stack stack-12 mt-16 small">
+          <div class="list-item"><span class="lead amber">1</span><div class="body"><strong>Tryb lokalny (domyślny)</strong>
+            <small>Dane są w tej przeglądarce (<code>localStorage</code>). Karty tego samego urządzenia synchronizują się przez <code>BroadcastChannel</code> — więc nauczyciel + tablica + symulowany telefon działają od razu, bez instalacji. Telefony innych urządzeń tego nie zobaczą.</small></div></div>
+          <div class="list-item"><span class="lead green">2</span><div class="body"><strong>Serwer klasy — <code>node server.js</code></strong>
+            <small>Wszystkie urządzenia w tej samej sieci (Wi-Fi szkoły) widzą wspólny stan gry przez API + SSE. Stan zapisany w <code>.data/cq-db.json</code>, więc po restarcie serwera nic nie ginie. Zero bibliotek, zero konta.</small></div></div>
+          <div class="list-item"><span class="lead">3</span><div class="body"><strong>Supabase</strong>
+            <small>Podaj URL + klucz w „Ustawienia”. Aplikacja używa PostgREST bezpośrednio (bez SDK), odświeżając dane co 3 s. Wymaga tabel z pliku <code>supabase/schema.sql</code>.</small></div></div>
+        </div>
+        <p class="tiny muted mt-16">Zmianę trybu zobaczysz w chipie w nagłówku. Kopia JSON z „Ustawienia” przenosi dane między trybami.</p>
+      </section>
+
+      <section class="neu-card" id="serwer">
+        <h2 style="font-size:1.3rem">Serwer klasy — jak uruchomić</h2>
+        <pre>cd ClassQuest
+node server.js           # domyślnie port 8123
+PORT=3000 node server.js # jeśli port zajęty</pre>
+        <p class="small muted mt-16">W konsoli zobaczysz adresy w sieci lokalnej — wydrukujcie je na tablicy albo podajcie uczniom.
+        Serwer nie wymaga logowania i nie szyfruje ruchu: używajcie go w zaufanej sieci szkolnej, a do pracy przez internet włączcie Supabase.</p>
+      </section>
+
+      <section class="neu-card" id="supabase">
+        <h2 style="font-size:1.3rem">Supabase krok po kroku</h2>
+        <ol class="small" style="padding-left:20px;line-height:2">
+          <li>Utwórz projekt na supabase.com.</li>
+          <li>Otwórz <b>SQL Editor</b> i uruchom zawartość pliku <code>supabase/schema.sql</code> (tworzy tabele i polityki dostępu dla demonstracyjnej pracy klasy).</li>
+          <li>W <b>Project Settings → API</b> skopiuj URL projektu oraz klucz <i>publishable</i>/<i>anon</i>.</li>
+          <li>W ClassQuest: <b>Ustawienia → Supabase</b>, wklej obie wartości, „Testuj połączenie”, „Zapisz i przeładuj”.</li>
+          <li>Uwaga o bezpieczeństwie: klucze publiczne są widoczne w kodzie strony. Do prawdziwego dziennika szkolnego dodaj Supabase Auth i RLS po ról (<code>nauczyciel</code>/<code>uczen</code>) — hasła hashowane w przeglądarce nie są ochroną na levelu szkoły.</li>
+        </ol>
+      </section>
+
+      <section class="neu-card" id="awarie">
+        <h2 style="font-size:1.3rem">Awarie i obejścia</h2>
+        <div class="stack stack-8 mt-16">
+          <details class="acc"><summary>Uczeń nie widzi pytania po STARCIE</summary><div class="acc-body small muted">
+            Upewnij się, że panel i telefony są w tym samym trybie danych. Chip w prawym górnym rogu musi być zielony („Serwer klasy” / „Supabase”).
+            W trybie lokalnym telefony nie połączą się z Twoim laptopem — to celowe ograniczenie przeglądarki.</div></details>
+          <details class="acc"><summary>Kod pokoju odrzucany</summary><div class="acc-body small muted">
+            Kod ma 6 cyfr i działa, dopóki sesja nie jest zakończona. W „Wyniki” albo „Administracja → Sesje” zobaczysz, czy gra nie została zamknięta.
+            Przy każdym starcie kod jest losowany ponownie, więc stary link prowadzi do archiwalnej gry.</div></details>
+          <details class="acc"><summary>Brak punktów XP po grze</summary><div class="acc-body small muted">
+            XP nalicza się dopiero przy kliknięciu „Zakończ i nalicz XP” (albo „Koniec gry 🏁”). Dodatkowo uczeń musi być wybrany z listy klasy —
+            osoby wpisane ręcznie grają, ale nie mają konta w dzienniku (przycisk ✨ przy graczu dopisze go do klasy i przyzna punkty).</div></details>
+          <details class="acc"><summary>Zestaw ma za mało pytań / błąd „brak pytań”</summary><div class="acc-body small muted">
+            Wymagane jest minimum 1 pytanie z poprawną odpowiedzią. W banku zobaczysz licznik przy każdym zestawie; brak wyjaśnienia czy opcji C/D nie blokuje gry.</div></details>
+          <details class="acc"><summary>Chcę przewinąć rok szkolny / wyczyścić dane</summary><div class="acc-body small muted">
+            „Ustawienia → Kopia i reset”. Przed skasowaniem zrób eksport — wrócisz w minutę. Administrator ma dodatkowo „Przelicz XP uczniów”,
+            jeśli księga XP rozejdzie się z sumą punktów.</div></details>
+          <details class="acc"><summary>Strona wygląda na zepsutą po zmianie trybu</summary><div class="acc-body small muted">
+            Odśwież (Ctrl/Cmd + R). Stan aplikacji trzymany jest w pamięci karty, a tryb danych czytany jest przy starcie.</div></details>
+        </div>
+      </section>
+
+      <section class="neu-card" id="skroty">
+        <h2 style="font-size:1.3rem">Skróty klawiszy</h2>
+        <div class="grid-3 mt-16 small" style="gap:14px">
+          <div><b>Panel nauczyciela</b><p class="mt-8 muted"><kbd>Spacja</kbd> następna faza · <kbd>N</kbd> dalej · <kbd>R</kbd> pokaż wynik · <kbd>F</kbd> zakończ · <kbd>P</kbd> pauza</p></div>
+          <div><b>Tablica</b><p class="mt-8 muted"><kbd>Spacja</kbd> start · <kbd>R</kbd> wynik pytania · <kbd>N</kbd> następne pytanie · <kbd>F</kbd> pełny ekran</p></div>
+          <div><b>Ekran ucznia</b><p class="mt-8 muted"><kbd>1</kbd>–<kbd>4</kbd> albo <kbd>A</kbd>–<kbd>D</kbd> wybierają odpowiedź. Enter wysyła odpowiedź otwartą.</p></div>
+        </div>
+      </section>
+
+      <p class="tiny muted center mt-16">ClassQuest v<span id="ver"></span> · testy logiki: <code>node tools/test-store.js</code></p>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/store.js"></script>
+<script src="assets/js/ui.js"></script>
+<script type="module">
+  const { ui } = CQ;
+  document.querySelectorAll('[data-theme-toggle]').forEach((b) => b.addEventListener('click', () => ui.applyTheme(!ui.isDark())));
+  await CQ.store.ready();
+  const me = CQ.Auth.current();
+  ui.bootHeader({
+    active: 'pomoc',
+    links: me ? (me.rola === 'admin' ? ['admin', 'ustawienia', 'pomoc'] : ['nauczyciel', 'klasy', 'zestawy', 'wyniki', 'ustawienia', 'pomoc']) : null,
+    user: me,
+  });
+  document.getElementById('ver').textContent = CQ.wersja;
+  ui.animateText('h1', 0.1, 0.02);
+</script>
+</body>
+</html>

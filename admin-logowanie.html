@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logowanie administratora — ClassQuest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <style>
+    .auth-card { animation: cardEnter .55s var(--ease-smooth) both; }
+    .alert { padding: 12px 16px; border-radius: 16px; font-weight: 700; font-size: .88rem; display: none; }
+    .alert.show { display: block; animation: pop .3s var(--ease-bounce); background: var(--red-soft); color: var(--red); }
+  </style>
+</head>
+<body>
+<div class="auth-layout">
+  <div class="neu-card auth-card" style="max-width:430px">
+    <div class="row-between mb-16">
+      <a class="brand" href="index.html"><span class="brand-mark">🛡️</span><span>ClassQuest<small>strefa administratora</small></span></a>
+      <button class="neu-btn square icon-only" data-theme-toggle>🌙</button>
+    </div>
+    <h1 style="font-size:1.6rem">Panel administratora</h1>
+    <p class="muted semi small mt-8">Konta nauczycieli, zdrowie danych i operacje masowe. Dostęp tylko dla roli <b>admin</b>.</p>
+    <div class="alert mt-16" id="alert"></div>
+    <form id="form" class="mt-16">
+      <div class="field"><label for="login">Login</label>
+        <input class="neu-input" id="login" placeholder="admin@classquest.pl" autocomplete="username" required></div>
+      <div class="field"><label for="haslo">Hasło</label>
+        <input class="neu-input" id="haslo" type="password" placeholder="••••••" autocomplete="current-password" required></div>
+      <button class="neu-btn primary block lg" id="submit" type="submit">Zaloguj</button>
+    </form>
+    <div class="neu-card inset pad-sm mt-24 small">
+      Konto z danych demo: <b class="mono">admin@classquest.pl</b> / <b class="mono">admin123</b>
+      <div class="mt-8"><a href="logowanie.html" class="semi small">To nie ta furtka — logowanie nauczyciela →</a></div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/store.js"></script>
+<script src="assets/js/ui.js"></script>
+<script type="module">
+  const { ui } = CQ;
+  document.querySelectorAll('[data-theme-toggle]').forEach((b) => b.addEventListener('click', () => ui.applyTheme(!ui.isDark())));
+  await CQ.store.ready();
+  const cur = CQ.Auth.current();
+  if (cur && cur.rola === 'admin') location.replace('admin.html');
+
+  document.getElementById('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const box = document.getElementById('alert');
+    box.className = 'alert';
+    const btn = document.getElementById('submit');
+    btn.classList.add('spin');
+    try {
+      const me = await CQ.Auth.login({ login: document.getElementById('login').value.trim(), haslo: document.getElementById('haslo').value });
+      if (me.rola !== 'admin') throw new Error('To konto nie ma uprawnień administratora.');
+      location.replace('admin.html');
+    } catch (err) {
+      box.textContent = err.message;
+      box.className = 'alert show';
+      btn.classList.remove('spin');
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ustawienia — ClassQuest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <style>
+    .mode-card { display: grid; grid-template-columns: 30px 1fr; gap: 14px; align-items: flex-start; }
+    .mode-card input { margin-top: 4px; accent-color: var(--blue); width: 18px; height: 18px; }
+    .check { display: flex; align-items: flex-start; gap: 11px; padding: 12px 14px; border-radius: 16px; box-shadow: 5px 5px 11px var(--shadow-dark-soft), -5px -5px 11px var(--shadow-light); }
+    .check .dot { width: 11px; height: 11px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; background: var(--green); box-shadow: 0 0 10px var(--green); }
+    .check.bad .dot { background: var(--amber); box-shadow: 0 0 10px var(--amber); }
+    .check.err .dot { background: var(--red); box-shadow: 0 0 10px var(--red); }
+    code.file { background: var(--bg-deep); padding: 2px 7px; border-radius: 7px; font-weight: 700; }
+  </style>
+</head>
+<body>
+<div class="container mid">
+  <div class="page-head row-between wrap">
+    <div><h1>Ustawienia</h1><p>Tu decydujesz, gdzie mieszkają dane, jak liczone są punkty i co zrobić, gdy coś się wysypie.</p></div>
+    <span id="mode-slot"></span>
+  </div>
+
+  <div class="stack stack-24">
+    <div class="neu-card">
+      <div class="section-title">🗄️ Gdzie mieszkają dane</div>
+      <div class="list">
+        <label class="list-item mode-card"><input type="radio" name="mode" value="auto" checked>
+          <span><b>Automatycznie (polecane)</b><small class="muted">Jeśli działa <code class="file">node server.js</code> — synchronizacja przez serwer klasy. W pozostałych przypadkach: localStorage tej przeglądarki.</small></span></label>
+        <label class="list-item mode-card"><input type="radio" name="mode" value="lokalny">
+          <span><b>Tylko ta przeglądarka</b><small class="muted">Zero wymagania. Gra działa na jednym urządzeniu (nauczyciel + tablica w dwóch kartach tej samej przeglądarki).</small></span></label>
+        <label class="list-item mode-card"><input type="radio" name="mode" value="serwer">
+          <span><b>Serwer klasy (server.js)</b><small class="muted">Telefony uczniów i tablica widzą tę samą grę. Wymaga <code class="file">node server.js</code> w tej samej sieci.</small></span></label>
+        <label class="list-item mode-card"><input type="radio" name="mode" value="supabase">
+          <span><b>Supabase (chmura)</b><small class="muted">Dane przeżyją czyszczenie przeglądarki i działają między budynkami. Uzupełnij URL i klucz poniżej.</small></span></label>
+      </div>
+      <div class="mt-24 hidden" id="serwer-box">
+        <div class="field"><label class="neu-label" for="serwer-url">Adres serwera klasy (zostaw puste = ten sam serwer, na którym działa strona)</label>
+          <input class="neu-input" id="serwer-url" placeholder="http://192.168.0.20:8123">
+          <div class="tiny muted mt-8">Przydatne, gdy klasa otwiera stronę z innego hosta (np. szkolny komputer jako serwer). Uruchomienie: <b>node server.js</b></div></div>
+        <button class="neu-btn sm primary" id="serwer-test">Testuj serwer</button>
+        <span class="tiny muted" id="serwer-result"></span>
+      </div>
+      <div class="mt-24 hidden" id="supa-box">
+        <div class="grid-2" style="gap:12px">
+          <div class="field"><label class="neu-label" for="supa-url">URL projektu</label>
+            <input class="neu-input" id="supa-url" placeholder="https://xxxx.supabase.co"></div>
+          <div class="field"><label class="neu-label" for="supa-key">Klucz publiczny (anon / publishable)</label>
+            <input class="neu-input" id="supa-key" placeholder="sb_publishable_… / eyJ…"></div>
+        </div>
+        <div class="row-8 wrap"><button class="neu-btn sm primary" id="supa-test">Testuj połączenie</button>
+          <a class="neu-btn sm" href="supabase/schema.sql" download>Pobierz schema.sql</a>
+          <span class="tiny muted" id="supa-result"></span></div>
+      </div>
+      <div class="row-8 mt-16">
+        <button class="neu-btn primary" id="save-mode">Zapisz i przeładuj</button>
+        <span class="tiny muted">Aktualnie: <b id="cur-mode">—</b> · rozmiar danych: <b id="db-size">—</b></span>
+      </div>
+    </div>
+
+    <div class="neu-card">
+      <div class="section-title">🎯 Domyślne parametry gry</div>
+      <div class="grid-3" style="gap:12px">
+        <div class="field"><label class="neu-label" for="cfg-czas">Sekund na pytanie</label>
+          <input class="neu-input" id="cfg-czas" type="number" min="5" max="120"></div>
+        <div class="field"><label class="neu-label" for="cfg-base">Punkty bazowe za dobrą odpowiedź</label>
+          <input class="neu-input" id="cfg-base" type="number" min="100" max="5000" step="50"></div>
+        <div class="field"><label class="neu-label" for="cfg-bonus">Maks. bonus za czas</label>
+          <input class="neu-input" id="cfg-bonus" type="number" min="0" max="2000" step="50"></div>
+      </div>
+      <div class="row-8"><button class="neu-btn sm primary" id="save-cfg">Zapisz wartości</button>
+        <span class="tiny muted">Dotyczą nowych gier — każda sesja może mieć własny czas.</span></div>
+    </div>
+
+    <div class="neu-card">
+      <div class="section-title">🩺 Stan instalacji <span class="spacer"></span><button class="neu-btn sm ghost" id="recheck">↻ Sprawdź ponownie</button></div>
+      <div class="list" id="diag"></div>
+      <div class="row-8 mt-16"><button class="neu-btn sm" id="repair">🔧 Napraw dane (usuń osierocone rekordy)</button></div>
+    </div>
+
+    <div class="neu-card">
+      <div class="section-title">💾 Kopia i reset</div>
+      <div class="grid-2" style="gap:16px">
+        <div class="neu-card pad-sm inset">
+          <b class="small">Eksport</b>
+          <p class="tiny muted mt-8">Całość w jednym pliku JSON: klasy, uczniowie, bank pytań, wyniki.</p>
+          <div class="row-8 mt-8"><button class="neu-btn sm primary" id="export">⬇️ Pobierz kopię</button></div>
+        </div>
+        <div class="neu-card pad-sm inset">
+          <b class="small">Import</b>
+          <p class="tiny muted mt-8">Nadpisuje bieżące dane — najpierw zrób eksport.</p>
+          <div class="row-8 mt-8"><button class="neu-btn sm" id="import">⬆️ Wczytaj kopię</button></div>
+        </div>
+        <div class="neu-card pad-sm inset">
+          <b class="small">Dane demonstracyjne</b>
+          <p class="tiny muted mt-8">Konto nauczyciela, 3 klasy, 5 zestawów, przykładowe wyniki.</p>
+          <div class="row-8 mt-8"><button class="neu-btn sm" id="reseed">🌱 Przeładuj demo</button></div>
+        </div>
+        <div class="neu-card pad-sm inset" style="border-left:4px solid var(--red)">
+          <b class="small">Strefa niebezpieczna</b>
+          <p class="tiny muted mt-8">Usunięcie wszystkich danych konta, klas, pytań i wyników.</p>
+          <div class="row-8 mt-8"><button class="neu-btn sm danger-solid" id="wipe">🧹 Skasuj wszystko</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="neu-card">
+      <div class="section-title">⌨️ Skróty i pliki</div>
+      <div class="grid-2" style="gap:18px">
+        <div class="small">
+          <p class="mb-8"><b>Tablica</b>: <kbd>Spacja</kbd> start · <kbd>R</kbd> pokaż wynik · <kbd>N</kbd> następne · <kbd>F</kbd> pełny ekran</p>
+          <p class="mb-8"><b>Panel</b>: <kbd>Spacja</kbd> faza dalej · <kbd>N</kbd> następne · <kbd>F</kbd> zakończ</p>
+          <p><b>Gracz</b>: klawisze <kbd>1</kbd>–<kbd>4</kbd> lub <kbd>A</kbd>–<kbd>D</kbd> odpowiadają w grze</p>
+        </div>
+        <div class="small muted">
+          <p><code class="file">server.js</code> — serwer synchronizacji i plików</p>
+          <p><code class="file">assets/js/store.js</code> — model danych i zasady punktacji</p>
+          <p><code class="file">assets/js/ui.js</code> — wspólne elementy interfejsu</p>
+          <p><code class="file">supabase/schema.sql</code> — tabele do bazy chmurowej</p>
+          <p><code class="file">tools/test-store.js</code> — testy logiki (<code class="file">node tools/test-store.js</code>)</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="tiny muted center">ClassQuest v<span id="ver"></span> · motyw zapisywany lokalnie · <a href="pomoc.html">instrukcja</a></p>
+  </div>
+</div>
+
+<script src="assets/js/store.js"></script>
+<script src="assets/js/ui.js"></script>
+<script type="module">
+  const { ui } = CQ;
+  const $ = (s) => document.querySelector(s);
+  const me = await ui.bootTeacher({ active: 'ustawienia' });
+  if (!me) throw new Error('brak dostępu');
+  await CQ.store.ready();
+  $('#ver').textContent = CQ.wersja;
+  $('#cur-mode').textContent = CQ.store.modeLabel;
+  $('#mode-slot').innerHTML = ui.modeChip();
+
+  function refreshSize() { $('#db-size').textContent = CQ.store.storageKb() + ' kB'; }
+  refreshSize();
+
+  const cfg = CQ.readConfig();
+  document.querySelector(`input[name=mode][value="${cfg.mode}"]`)?.setAttribute('checked', 'checked');
+  $('#supa-url').value = cfg.supabaseUrl || '';
+  $('#supa-key').value = cfg.supabaseKey || '';
+  $('#supa-box').classList.toggle('hidden', cfg.mode !== 'supabase');
+  $('#cfg-czas').value = cfg.defaultCzas;
+  $('#cfg-base').value = cfg.punktyBazowe;
+  $('#cfg-bonus').value = cfg.bonusCzasowy;
+
+  document.querySelectorAll('input[name=mode]').forEach((r) => r.addEventListener('change', () => {
+    $('#supa-box').classList.toggle('hidden', r.value !== 'supabase');
+    $('#serwer-box').classList.toggle('hidden', r.value !== 'serwer');
+  }));
+  $('#serwer-box').classList.toggle('hidden', cfg.mode !== 'serwer');
+  $('#serwer-url').value = cfg.serwerUrl || '';
+  $('#serwer-test').addEventListener('click', async () => {
+    const base = $('#serwer-url').value.trim().replace(/\/+$/, '');
+    const out = $('#serwer-result');
+    out.textContent = 'sprawdzam…'; out.style.color = 'var(--text-muted)';
+    try {
+      const res = await fetch(base + '/api/health', { cache: 'no-store' });
+      const j = await res.json();
+      out.textContent = res.ok && j.ok ? `✓ serwer działa (v${j.version}, ${j.clients} odbiorników, ${j.uptime_s}s uptime)` : `✗ odpowiedź ${res.status}`;
+      out.style.color = res.ok ? 'var(--green)' : 'var(--red)';
+    } catch (e) { out.textContent = '✗ ' + e.message; out.style.color = 'var(--red)'; }
+  });
+
+  $('#save-mode').addEventListener('click', () => {
+    const mode = document.querySelector('input[name=mode]:checked').value;
+    CQ.writeConfig({
+      mode,
+      supabaseUrl: $('#supa-url').value.trim(), supabaseKey: $('#supa-key').value.trim(),
+      serwerUrl: $('#serwer-url').value.trim(),
+    });
+    if (mode === 'supabase' && (!$('#supa-url').value.trim() || !$('#supa-key').value.trim())) {
+      return ui.toast('Uzupełnij URL i klucz Supabase — inaczej wrócimy do trybu lokalnego.', 'warn');
+    }
+    if (mode === 'serwer') {
+      ui.toast('Tryb serwera wymaga uruchomionego „node server.js” — inaczej start wróci do trybu lokalnego.', 'warn', 6000);
+    }
+    ui.toast('Zapisano — przeładowuję…', 'ok', 900);
+    setTimeout(() => location.reload(), 700);
+  });
+
+  $('#supa-test').addEventListener('click', async () => {
+    const url = $('#supa-url').value.trim().replace(/\/+$/, '');
+    const key = $('#supa-key').value.trim();
+    const out = $('#supa-result');
+    if (!url || !key) { out.textContent = 'Podaj URL i klucz.'; out.style.color = 'var(--red)'; return; }
+    out.textContent = 'sprawdzam…'; out.style.color = 'var(--text-muted)';
+    try {
+      const res = await fetch(url + '/rest/v1/nauczyciele?select=id&limit=1', { headers: { apikey: key, Authorization: 'Bearer ' + key } });
+      out.textContent = res.ok ? `✓ połączono (HTTP ${res.status})` : `✗ HTTP ${res.status} — sprawdź klucze i RLS`;
+      out.style.color = res.ok ? 'var(--green)' : 'var(--red)';
+    } catch (e) {
+      out.textContent = '✗ brak zasięgu: ' + e.message;
+      out.style.color = 'var(--red)';
+    }
+  });
+
+  $('#save-cfg').addEventListener('click', () => {
+    CQ.writeConfig({ defaultCzas: +$('#cfg-czas').value || 20, punktyBazowe: +$('#cfg-base').value || 1000, bonusCzasowy: +$('#cfg-bonus').value || 500 });
+    ui.toast('Zapisano wartości domyślne.', 'ok');
+  });
+
+  async function renderDiag() {
+    const items = await CQ.Diagnostyka.run();
+    $('#diag').innerHTML = items.map((i) => `
+      <div class="check ${i.ok ? '' : 'bad'}">
+        <span class="dot"></span>
+        <div class="grow"><b class="small">${ui.esc(i.name)}</b>
+          <div class="tiny muted">${ui.esc(i.msg)}${i.hint ? ' · ' + ui.esc(i.hint) : ''}</div></div>
+        <span class="badge ${i.ok ? 'green' : 'amber'}">${i.ok ? 'OK' : 'sprawdź'}</span>
+      </div>`).join('');
+    refreshSize();
+  }
+  $('#recheck').addEventListener('click', renderDiag);
+  $('#repair').addEventListener('click', async () => {
+    const n = await CQ.Diagnostyka.napraw();
+    ui.toast(n ? `Usunięto ${n} osieroconych rekordów.` : 'Nie było czego naprawiać.', n ? 'ok' : 'info');
+    renderDiag();
+  });
+
+  $('#export').addEventListener('click', () => {
+    ui.download(`classquest-kopia-${new Date().toISOString().slice(0, 10)}.json`, CQ.Dane.export());
+    ui.toast('Kopia pobrana.', 'ok');
+  });
+  $('#import').addEventListener('click', () => {
+    const input = ui.el('input', { type: 'file', accept: 'application/json,.json' });
+    input.addEventListener('change', async () => {
+      try {
+        const counts = await CQ.Dane.import(await input.files[0].text());
+        ui.toast(`Wczytano: ${Object.entries(counts).map(([k, v]) => `${k} ${v}`).join(', ')}`, 'ok', 5000);
+        setTimeout(() => location.reload(), 900);
+      } catch (err) { ui.toast('Import nieudany: ' + err.message, 'err', 6000); }
+    });
+    input.click();
+  });
+  $('#reseed').addEventListener('click', async () => {
+    const yes = await ui.confirmBox('Wgrać dane demo od nowa?', 'Bieżące klasy, zestawy i wyniki zostaną zastąpione przykładowym kompletem.', { ok: 'Tak, wgraj demo' });
+    if (!yes) return;
+    await CQ.Dane.resetDemo();
+    ui.toast('Wgrano dane demonstracyjne.', 'ok');
+    setTimeout(() => location.reload(), 800);
+  });
+  $('#wipe').addEventListener('click', async () => {
+    const v = await ui.formModal('Skasować wszystkie dane?', [
+      { name: 'potwierdzenie', label: 'Wpisz: SKASUJE', hint: 'To usunie nauczycieli, klasy, pytania i wyniki z tego trybu danych.', required: true },
+    ], { okLabel: 'Skasuj wszystko' });
+    if (!v || v.potwierdzenie.trim().toUpperCase() !== 'SKASUJE') return ui.toast('Anulowane — dla odmiany dobrze.', 'info');
+    await CQ.Dane.wipe();
+    ui.toast('Wszystko wyczyszczone. Wylogowano.', 'warn');
+    setTimeout(() => location.href = 'logowanie.html', 900);
+  });
+
+  renderDiag();
+</script>
+</body>
+</html>

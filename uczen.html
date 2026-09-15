@@ -3,450 +3,255 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ClassQuest - Dołącz do gry</title>
+  <title>Strefa ucznia — ClassQuest</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/base.css">
   <style>
-    :root {
-      --bg: #e6ecf5;
-      --text-main: #2d3748;
-      --text-muted: #718096;
-      --accent: #2563eb;
-      --accent-green: #10b981;
-
-      --shadow-dark: rgba(166, 180, 200, 0.7);
-      --shadow-light: #ffffff;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-
-    body {
-      background-color: var(--bg);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .main-wrapper {
-      width: 100%;
-      max-width: 480px;
-    }
-
-    /* Karta bazowa */
-    .neu-card {
-      background: linear-gradient(145deg, #f0f6ff, #e0e7f1);
-      border-radius: 32px;
-      padding: 36px 32px;
-      box-shadow: 
-        14px 14px 28px var(--shadow-dark),
-        -14px -14px 28px var(--shadow-light);
-
-      opacity: 0;
-      transform: translate(-15px, -15px) scale(0.96);
-      animation: cardAppear 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    @keyframes cardAppear {
-      to {
-        opacity: 1;
-        transform: translate(0, 0) scale(1);
-      }
-    }
-
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--text-muted);
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 0.85rem;
-      margin-bottom: 16px;
-      cursor: pointer;
-    }
-
-    .title {
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: var(--text-main);
-      margin-bottom: 6px;
-    }
-
-    .subtitle {
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 24px;
-    }
-
-    /* Step System */
-    .step {
-      display: none;
-    }
-
-    .step.active {
-      display: block;
-    }
-
-    /* Wklęsłe Inputy */
-    .neu-input {
-      width: 100%;
-      padding: 16px 20px;
-      border-radius: 18px;
-      border: none;
-      outline: none;
-      background: linear-gradient(145deg, #dbe2ed, #ffffff);
-      color: var(--text-main);
-      font-size: 1.2rem;
-      font-weight: 800;
-      letter-spacing: 2px;
-      text-align: center;
-      margin-bottom: 20px;
-
-      box-shadow: 
-        inset 4px 4px 8px var(--shadow-dark),
-        inset -4px -4px 8px var(--shadow-light);
-    }
-
-    .neu-input::placeholder {
-      letter-spacing: normal;
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--text-muted);
-    }
-
-    /* Lista uczniów w dzienniku */
-    .student-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      max-height: 220px;
-      overflow-y: auto;
-      padding-right: 6px;
-      margin-bottom: 20px;
-    }
-
-    .student-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      border-radius: 16px;
-      background: linear-gradient(145deg, #ffffff, #dbe2ed);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      cursor: pointer;
-      box-shadow: 
-        4px 4px 8px var(--shadow-dark),
-        -4px -4px 8px var(--shadow-light);
-      transition: all 0.2s ease;
-    }
-
-    .student-item:hover, .student-item.selected {
-      color: var(--accent);
-      border-color: var(--accent);
-      transform: translateY(-2px);
-    }
-
-    .student-num {
-      width: 28px;
-      height: 28px;
-      border-radius: 10px;
-      background: rgba(37, 99, 235, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 0.85rem;
-    }
-
-    .student-name {
-      font-weight: 700;
-      font-size: 0.95rem;
-    }
-
-    /* Podgląd Ludzika */
-    .avatar-preview-box {
-      padding: 20px;
-      border-radius: 20px;
-      background: linear-gradient(145deg, #dbe2ed, #ffffff);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 20px;
-      box-shadow: 
-        inset 4px 4px 8px var(--shadow-dark),
-        inset -4px -4px 8px var(--shadow-light);
-    }
-
-    .character {
-      width: 60px;
-      height: 80px;
-      position: relative;
-      transition: all 0.2s ease;
-    }
-
-    /* Ludzik w stylu bean/bean-avatar */
-    .char-body {
-      width: 100%;
-      height: 100%;
-      background: var(--char-color, #2563eb);
-      border-radius: 30px 30px 20px 20px;
-      position: relative;
-      box-shadow: inset -4px -4px 8px rgba(0,0,0,0.2), inset 4px 4px 8px rgba(255,255,255,0.4);
-    }
-
-    .char-eyes {
-      position: absolute;
-      top: 22px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 10px;
-    }
-
-    .eye {
-      width: 8px;
-      height: 12px;
-      background: #ffffff;
-      border-radius: 50%;
-      position: relative;
-    }
-
-    .eye::after {
-      content: '';
-      position: absolute;
-      width: 4px;
-      height: 4px;
-      background: #000000;
-      border-radius: 50%;
-      top: 4px;
-      left: 2px;
-    }
-
-    .char-hat {
-      position: absolute;
-      top: -10px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 1.5rem;
-    }
-
-    /* Wybór koloru */
-    .color-picker {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .color-dot {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      cursor: pointer;
-      box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
-      transition: transform 0.15s ease;
-    }
-
-    .color-dot:hover {
-      transform: scale(1.15);
-    }
-
-    /* Wybór nakrycia głowy */
-    .hat-picker {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .hat-btn {
-      padding: 8px 12px;
-      border-radius: 12px;
-      background: linear-gradient(145deg, #ffffff, #dbe2ed);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      cursor: pointer;
-      font-size: 1.1rem;
-      box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
-    }
-
-    /* Przycisk Akcji */
-    .neu-btn {
-      width: 100%;
-      padding: 16px;
-      border-radius: 20px;
-      background: linear-gradient(145deg, #ffffff, #dbe2ed);
-      color: var(--accent);
-      font-weight: 800;
-      font-size: 1rem;
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      cursor: pointer;
-      box-shadow: 
-        6px 6px 12px var(--shadow-dark),
-        -6px -6px 12px var(--shadow-light);
-      transition: all 0.15s ease;
-    }
-
-    .neu-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
-    }
-
-    .neu-btn:active {
-      transform: translateY(1px);
-      background: linear-gradient(145deg, #dbe2ed, #ffffff);
-      box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
-    }
-
-    .char {
-      display: inline-block;
-      opacity: 0;
-      transform: translateY(14px);
-      animation: letterJump 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    }
-
-    @keyframes letterJump {
-      0% { opacity: 0; transform: translateY(14px); }
-      60% { transform: translateY(-4px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
+    .uczen-wrap { max-width: 900px; margin: 0 auto; padding: 30px 18px 70px; }
+    .hero-uczen { display: grid; grid-template-columns: auto 1fr; gap: 22px; align-items: center; }
+    @media (max-width: 640px) { .hero-uczen { grid-template-columns: 1fr; text-align: center; justify-items: center; } }
+    .hero-uczen .avatar { transform: scale(1.35); margin: 8px 22px 8px 8px; }
+    .quick { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .quick .card-cta { padding: 22px; cursor: pointer; text-align: left; transition: transform .18s var(--ease-bounce); }
+    .quick .card-cta:hover { transform: translateY(-4px); }
+    .quick h3 { font-size: 1.1rem; }
+    .lvl-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(76px,1fr)); gap: 8px; }
+    .lvl-grid .c { text-align: center; padding: 10px 4px; border-radius: 14px; box-shadow: 5px 5px 10px var(--shadow-dark-soft), -5px -5px 10px var(--shadow-light); }
+    .lvl-grid .c.on { color: #fff; background: linear-gradient(145deg,#4287f5,#1d4ed8); }
+    .lvl-grid .c .em { font-size: 1.2rem; }
+    .status-ok { color: var(--green); } .status-wait { color: var(--amber); } .status-no { color: var(--red); }
   </style>
 </head>
 <body>
+<div class="uczen-wrap">
+  <div class="row-between mb-16">
+    <a class="brand" href="index.html"><span class="brand-mark">🎒</span><span>ClassQuest<small>strefa ucznia</small></span></a>
+    <div class="row-8">
+      <button class="neu-btn square icon-only" data-theme-toggle>🌙</button>
+      <a class="neu-btn sm ghost" href="gra.html">Mam kod →</a>
+    </div>
+  </div>
+  <div id="app"></div>
+</div>
 
-  <div class="main-wrapper">
-    <div class="neu-card">
-      <a href="index.html" class="back-link">← Wróć</a>
-      
-      <h1 class="title" id="titleText">Dołącz do gry</h1>
-      <p class="subtitle" id="subtitleText">Wpisz kod PIN przekazany przez nauczyciela</p>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/ui.js"></script>
+<script type="module">
+  const { ui } = CQ;
+  const $ = (s) => document.querySelector(s);
+  const app = document.getElementById('app');
+  await CQ.store.ready();
+  document.querySelectorAll('[data-theme-toggle]').forEach((b) => b.addEventListener('click', () => ui.applyTheme(!ui.isDark())));
 
-      <div class="step active" id="step1">
-        <input type="text" class="neu-input" id="pinInput" placeholder="KOD PIN (np. 482 910)" maxlength="7" />
-        <button class="neu-btn" onclick="goToStep(2)">Dalej →</button>
-      </div>
+  let me = CQ.Student.current();
+  let krok = 0;
+  let tymKlasa = null, tymNazwa = null, tymKolor = CQ.PALETTE[0], tymNakrycie = '🎓';
 
-      <div class="step" id="step2">
-        <p style="font-weight: 700; font-size: 0.85rem; color: var(--text-main); margin-bottom: 12px;">Wybierz swój numer z dziennika:</p>
-        <div class="student-list" id="studentList">
-          <div class="student-item" onclick="selectStudent(this, 'Jan Kowalski')">
-            <span class="student-num">1</span>
-            <span class="student-name">Jan Kowalski</span>
+  /* ---------- ankieta „kim jestem" (pojawia się raz) ---------- */
+  function renderOnboarding(msg) {
+    app.innerHTML = `
+      <div class="neu-card card-enter" style="padding:32px">
+        <h1 style="font-size:1.6rem">Cześć! Znajdę Cię w dzienniku klasy.</h1>
+        <p class="muted small mt-8">To jednorazowe pytanie — dzięki niemu nauczyciel wie, komu przyznać punkty, a Twój awatar wraca w każdej grze na tym urządzeniu.</p>
+        ${msg ? `<div class="mt-16 tiny" style="color:var(--red);font-weight:800">⚠️ ${ui.esc(msg)}</div>` : ''}
+        <form id="ob" class="mt-24 stack stack-16">
+          <div class="grid-2" style="gap:14px">
+            <div><label class="neu-label" for="ob-klasa">Twoja klasa</label>
+              <div class="select-wrap"><select class="neu-select" id="ob-klasa">
+                <option value="">— wybierz —</option>
+                ${CQ.store.table('klasy').map((k) => `<option value="${k.id}" ${tymKlasa === k.id ? 'selected' : ''}>${ui.esc(k.nazwa)}</option>`).join('')}
+              </select></div></div>
+            <div><label class="neu-label" for="ob-nazwa">Ty</label>
+              <div class="select-wrap"><select class="neu-select" id="ob-nazwa"><option value="">— najpierw klasa —</option></select></div>
+              <button type="button" class="neu-btn sm ghost mt-8" id="ob-manual">Wpiszę nazwisko</button>
+              <input class="neu-input hidden mt-8" id="ob-manual-in" placeholder="np. Kuba 4B">
+              </div>
           </div>
-          <div class="student-item" onclick="selectStudent(this, 'Anna Nowak')">
-            <span class="student-num">2</span>
-            <span class="student-name">Anna Nowak</span>
-          </div>
-          <div class="student-item" onclick="selectStudent(this, 'Piotr Wiśniewski')">
-            <span class="student-num">3</span>
-            <span class="student-name">Piotr Wiśniewski</span>
-          </div>
-          <div class="student-item" onclick="selectStudent(this, 'Kasia Zielińska')">
-            <span class="student-num">4</span>
-            <span class="student-name">Kasia Zielińska</span>
-          </div>
-        </div>
-        <button class="neu-btn" id="confirmStudentBtn" onclick="goToStep(3)" style="opacity: 0.5; pointer-events: none;">Zatwierdź wybór</button>
-      </div>
-
-      <div class="step" id="step3">
-        <div class="avatar-preview-box">
-          <div class="character" id="charPreview">
-            <div class="char-hat" id="charHat">👑</div>
-            <div class="char-body" id="charBody">
-              <div class="char-eyes">
-                <div class="eye"></div>
-                <div class="eye"></div>
+          <div>
+            <label class="neu-label">Awatar</label>
+            <div class="row-16" style="align-items:flex-start">
+              <div id="ob-prev">${ui.avatar('Ja', tymKolor, tymNakrycie)}</div>
+              <div class="stack stack-8 grow">
+                <div class="row-8 wrap" id="ob-colors">${CQ.PALETTE.map((c, i) => `<button type="button" class="swatch" data-c="${c}" style="background:${c};color:${c}"></button>`).join('')}</div>
+                <div class="row-8 wrap" id="ob-hats">${['🎓','👑','🚀','🎧','🦄','⚡'].map((h) => `<button type="button" class="chip-btn" data-h="${h}">${h}</button>`).join('')}</div>
               </div>
             </div>
           </div>
-          <p id="selectedNameLabel" style="font-weight: 800; font-size: 0.95rem; margin-top: 12px; color: var(--text-main);">Jan Kowalski</p>
-        </div>
+          <button class="neu-btn primary block lg" type="submit">Gotowe ✅</button>
+        </form>
+      </div>`;
 
-        <div class="color-picker">
-          <div class="color-dot" style="background: #2563eb;" onclick="changeColor('#2563eb')"></div>
-          <div class="color-dot" style="background: #10b981;" onclick="changeColor('#10b981')"></div>
-          <div class="color-dot" style="background: #f59e0b;" onclick="changeColor('#f59e0b')"></div>
-          <div class="color-dot" style="background: #ec4899;" onclick="changeColor('#ec4899')"></div>
-          <div class="color-dot" style="background: #8b5cf6;" onclick="changeColor('#8b5cf6')"></div>
-        </div>
+    const selK = $('#ob-klasa'), selN = $('#ob-nazwa'), manual = $('#ob-manual-in');
+    function repaint() { $('#ob-prev').innerHTML = ui.avatar(manual.value || 'Ja', tymKolor, tymNakrycie); }
+    function fill() {
+      const lista = selK.value ? CQ.Klasy.uczniowie(selK.value) : [];
+      selN.innerHTML = lista.length ? '<option value="">— wskaż siebie —</option>' + lista.map((u) =>
+        `<option value="${u.id}" data-nazwa="${ui.esc(u.nazwa)}">${u.numer || ''}. ${ui.esc(u.nazwa)}</option>`).join('')
+        : '<option value="">— klasa bez listy —</option>';
+      manual.classList.toggle('hidden', lista.length > 0);
+      $('#ob-manual').classList.toggle('hidden', lista.length > 0);
+      selN.classList.toggle('hidden', !lista.length);
+    }
+    selK.addEventListener('change', fill);
+    selN.addEventListener('change', () => {
+      const o = selN.selectedOptions[0];
+      tymNazwa = o?.dataset?.nazwa || '';
+      const u = o?.value ? CQ.store.byId('uczniowie', o.value) : null;
+      if (u) { tymKolor = u.kolor || tymKolor; tymNakrycie = u.nakrycie || tymNakrycie; }
+      repaint();
+    });
+    $('#ob-manual').addEventListener('click', () => { selN.classList.add('hidden'); manual.classList.remove('hidden'); manual.focus(); });
+    manual.addEventListener('input', repaint);
+    $('#ob-colors').addEventListener('click', (e) => { const b = e.target.closest('[data-c]'); if (!b) return; tymKolor = b.dataset.c; [...$('#ob-colors').children].forEach((x) => x.classList.toggle('selected', x === b)); repaint(); });
+    $('#ob-hats').addEventListener('click', (e) => { const b = e.target.closest('[data-h]'); if (!b) return; tymNakrycie = b.dataset.h; [...$('#ob-hats').children].forEach((x) => x.classList.toggle('selected', x === b)); repaint(); });
+    $('#ob').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = selN.value;
+      const nazwa = id ? (selN.selectedOptions[0].dataset.nazwa) : manual.value.trim();
+      if (!nazwa) return renderOnboarding('Wybierz nazwisko z listy albo wpisz je ręcznie.');
+      const uczen = id ? CQ.store.byId('uczniowie', id) : null;
+      if (uczen) {
+        if (uczen.kolor !== tymKolor || uczen.nakrycie !== tymNakrycie) CQ.store.update('uczniowie', uczen.id, { kolor: tymKolor, nakrycie: tymNakrycie });
+        me = CQ.Student.save({ uczen_id: uczen.id, nazwa: uczen.nazwa, klasa_id: uczen.klasa_id, kolor: tymKolor, nakrycie: tymNakrycie });
+      } else {
+        me = CQ.Student.save({ uczen_id: null, nazwa, klasa_id: selK.value || null, kolor: tymKolor, nakrycie: tymNakrycie });
+      }
+      render();
+    });
+  }
 
-        <div class="hat-picker">
-          <button class="hat-btn" onclick="changeHat('👑')">👑</button>
-          <button class="hat-btn" onclick="changeHat('🎓')">🎓</button>
-          <button class="hat-btn" onclick="changeHat('🎧')">🎧</button>
-          <button class="hat-btn" onclick="changeHat('🚀')">🚀</button>
-          <button class="hat-btn" onclick="changeHat('')">❌</button>
-        </div>
+  /* ---------- hub ucznia ---------- */
+  function render() {
+    if (!me || (!me.uczen_id && !me.nazwa)) return renderOnboarding();
+    const uczen = me.uczen_id ? CQ.store.byId('uczniowie', me.uczen_id) : null;
+    const p = CQ.poziomZxp(uczen ? uczen.xp : 0);
+    const klasa = uczen ? CQ.store.byId('klasy', uczen.klasa_id) : (me.klasa_id ? CQ.store.byId('klasy', me.klasa_id) : null);
+    const mojeSesje = CQ.store.table('gracze').filter((g) => uczen ? g.uczen_id === uczen.id : CQ.normalize(g.nazwa) === CQ.normalize(me.nazwa));
+    const rozegrane = [...new Set(CQ.store.table('odpowiedzi').filter((o) => mojeSesje.some((g) => g.id === o.gracz_id)).map((o) => o.sesja_id))]
+      .map((id) => CQ.store.byId('sesje', id)).filter((s) => s && s.status === 'koniec');
+    const otwartaSesja = CQ.store.table('sesje').find((s) => s.status !== 'koniec' && klasa && s.klasa_id === klasa.id);
+    const zgloszenia = uczen ? CQ.Zgloszenia.forStudent(uczen.id) : [];
+    const mojaLista = CQ.store.where('zestawy', (z) => klasa ? !z.klasa_id || z.klasa_id === klasa.id : true)
+      .filter((z) => CQ.Zestawy.pytania(z.id).length);
+    const statystyki = () => {
+      const odp = CQ.store.table('odpowiedzi').filter((o) => mojeSesje.some((g) => g.id === o.gracz_id));
+      return { odpowiedzi: odp.length, dobre: odp.filter((o) => o.poprawna).length, punkty: odp.reduce((a, b) => a + (b.punkty || 0), 0) };
+    };
+    const st = statystyki();
 
-        <button class="neu-btn" onclick="joinLobby()">Wejdź do gry 🎮</button>
+    app.innerHTML = `
+      <div class="neu-card hero-uczen card-enter">
+        <div>${ui.avatar(uczen ? uczen.nazwa : me.nazwa, (uczen || me).kolor || tymKolor, (uczen || me).nakrycie || tymNakrycie)}</div>
+        <div>
+          <div class="row-8 wrap"><h1 style="font-size:1.5rem">${ui.esc(uczen ? uczen.nazwa : me.nazwa)}</h1>
+            ${uczen ? ui.levelBadge(uczen.xp) : '<span class="badge amber">poza dziennikiem</span>'}</div>
+          <p class="muted small mt-8">${uczen ? 'Klasa ' + ui.esc(klasa ? klasa.nazwa : '?') + ' · nr ' + (uczen.numer || '—') : 'Nauczyciel może Cię dopisać do dziennika — na razie punkty zostają w grach.'}</p>
+          <div class="progress mt-16" style="max-width:340px"><i style="width:${Math.round(p.postep * 100)}%"></i></div>
+          <div class="tiny muted mt-8">${ui.fmtPts(uczen ? uczen.xp : 0)} XP · do poziomu ${p.poziom + 1} brakuje <b>${p.doKolejnego} XP</b></div>
+        </div>
       </div>
 
-    </div>
-  </div>
+      <div class="quick mt-16">
+        <button class="neu-btn" style="justify-content:flex-start;padding:22px;border-radius:24px" onclick="location.href='gra.html${otwartaSesja ? '?kod=' + otwartaSesja.kod : ''}'">
+          <span class="grow" style="text-align:left"><b style="font-size:1.05rem">🎮 Graj teraz</b>
+          <div class="tiny muted mt-8">${otwartaSesja ? 'Klasa ma otwartą grę — kod ' + otwartaSesja.kod : 'Wpisz kod od nauczyciela'}</div></span></button>
+        <div class="neu-card card-cta" ${''}>
+          <b>🧘 Trening przed sprawdzianem</b>
+          <p class="tiny muted mt-8">Wybierz zestaw i poćwicz bez presji. Nie psuje punktów z gry.</p>
+          <div class="stack stack-8 mt-8">${mojaLista.length ? mojaLista.slice(0, 4).map((z) =>
+            `<button class="neu-btn sm block" data-trening="${z.id}" style="justify-content:flex-start">${CQ.Zestawy.pytania(z.id).length} pyt. · ${ui.esc(z.nazwa_zestawu)}</button>`).join('')
+            : '<span class="tiny muted">Brak zestawów dla Twojej klasy.</span>'}</div>
+        </div>
+      </div>
 
-  <script>
-    let selectedStudent = "";
+      <div class="grid-2 mt-16" style="align-items:start">
+        <div class="neu-card">
+          <div class="section-title">📈 Moje osiągnięcia</div>
+          <div class="grid-3" style="gap:10px">
+            <div class="stat"><div class="label">Gry</div><div class="value">${rozegrane.length}</div></div>
+            <div class="stat"><div class="label">Odpowiedzi</div><div class="value">${st.odpowiedzi}</div></div>
+            <div class="stat"><div class="label">Dokładność</div><div class="value">${st.odpowiedzi ? Math.round(st.dobre / st.odpowiedzi * 100) : 0}%</div></div>
+          </div>
+          <div class="mt-16 tiny muted bold" style="letter-spacing:.06em">KOLEJNE POZIOMY</div>
+          <div class="lvl-grid mt-8">
+            ${CQ.Raporty.rankingKlasy(uczen?.klasa_id || '').length ? '' : ''}
+            ${Array.from({ length: 6 }, (_, i) => {
+              const lvl = p.poziom + i;
+              const name = ['🐣','📗','🧭','🧩','🎖️','🏆'][i];
+              return `<div class="c ${i === 0 ? 'on' : ''}"><div class="em">${lvl >= p.poziom + 6 ? '🔒' : name}</div><b class="tiny">poz. ${lvl}</b></div>`;
+            }).join('')}
+          </div>
+          <div class="section-title mt-24" style="font-size:1rem">🕹️ Ostatnie gry</div>
+          <div class="list tight">${rozegrane.length ? rozegrane.slice(0, 5).map((s) => {
+            const w = CQ.Gra.wynik(s.id);
+            const r = w.rows.find((x) => uczen ? x.uczen_id === uczen.id : CQ.normalize(x.nazwa) === CQ.normalize(me.nazwa));
+            const z = CQ.store.byId('zestawy', s.zestaw_id);
+            return `<div class="list-item"><span class="lead ${r && r.miejsce <= 3 ? 'green' : ''}">${r ? '#' + r.miejsce : '—'}</span>
+              <div class="body"><strong>${ui.esc(z ? z.nazwa_zestawu : 'zestaw')}</strong>
+                <small>${ui.fmtDate(s.zakonczo || s.utworzono)}${r ? ' · ' + ui.fmtPts(r.punkty) + ' pkt · ' + r.dobre + '/' + (r.dobre + r.zle) : ''}</small></div></div>`;
+          }).join('') : '<div class="tiny muted">Zagraj pierwszą lekcję, żeby tu się pojawiło.</div>'}</div>
+        </div>
 
-    function animateText(elementId, baseDelay) {
-      const el = document.getElementById(elementId);
-      const text = el.innerText;
-      el.innerHTML = '';
-      
-      [...text].forEach((char, index) => {
-        const span = document.createElement('span');
-        span.className = 'char';
-        span.innerHTML = char === ' ' ? '&nbsp;' : char;
-        span.style.animationDelay = `${baseDelay + (index * 0.03)}s`;
-        el.appendChild(span);
-      });
-    }
+        <div class="neu-card">
+          <div class="section-title">📥 Zgłoś pracę po lekcji</div>
+          <p class="tiny muted">Nauczyciel zatwierdza zgłoszenia w swoim panelu — wtedy dopisuje Ci XP.</p>
+          <form id="req" class="mt-16 stack stack-8">
+            <input class="neu-input" name="tytul" placeholder="Co zgłaszasz? np. kartkówka poprawiona" required maxlength="80">
+            <input class="neu-input" name="opis" placeholder="Szczegóły (opcjonalnie)" maxlength="160">
+            <div class="row-8"><input class="neu-input" name="xp" type="number" min="1" max="100" value="20" style="width:110px">
+              <button class="neu-btn primary grow" type="submit">Wyślij</button></div>
+          </form>
+          <div class="section-title mt-24" style="font-size:1rem">Historia zgłoszeń</div>
+          <div class="list tight">${zgloszenia.length ? zgloszenia.slice(0, 6).map((z) => `
+            <div class="list-item"><span class="badge ${z.status === 'oczekuje' ? 'amber status-wait' : z.status === 'zatwierdzone' ? 'green status-ok' : 'red status-no'}">${z.status}</span>
+              <div class="body"><strong>${ui.esc(z.tytul)}</strong><small>${z.xp} XP · ${ui.fmtDate(z.utworzono)}${z.komentarz ? ' · „' + ui.esc(z.komentarz) + '”' : ''}</small></div></div>`).join('')
+            : '<div class="tiny muted">Nie wysyłałeś jeszcze zgłoszeń.</div>'}</div>
+          <div class="row-8 mt-16">
+            <button class="neu-btn sm" data-reavatar>🎨 Zmień awatar</button>
+            <button class="neu-btn sm ghost" data-forget>Inne konto na tym telefonie</button>
+          </div>
+        </div>
+      </div>`;
 
-    animateText('titleText', 0.15);
-    animateText('subtitleText', 0.3);
+    app.querySelectorAll('[data-trening]').forEach((b) => b.addEventListener('click', () => location.href = 'gra.html?trening=' + b.dataset.trening));
+    $('#req').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const f = new FormData(e.target);
+      try {
+        await CQ.Zgloszenia.create({
+          nauczycielId: klasa ? klasa.nauczyciel_id : null, uczenId: uczen ? uczen.id : null,
+          tytul: f.get('tytul'), opis: f.get('opis'), xp: f.get('xp'),
+        });
+        e.target.reset();
+        ui.toast('Wysłane! Czekaj na zatwierdzenie.', 'ok');
+        render();
+      } catch (err) { ui.toast(err.message, 'err'); }
+    });
+    $('[data-forget]').addEventListener('click', async () => {
+      const yes = await ui.confirmBox('Zapomnieć to urządzenie?', 'Wrócisz do pytania o klasę i nazwisko. Punktów nie tracisz — są zapisane przy nazwisku.');
+      if (!yes) return;
+      CQ.Student.clear();
+      me = null;
+      render();
+    });
+    $('[data-reavatar]').addEventListener('click', async () => {
+      if (!uczen) { me && (me.uczen_id = null); }
+      const v = await ui.formModal('Twój awatar', [
+        { name: 'kolor', label: 'Kolor', type: 'select', options: CQ.PALETTE.map((c, i) => ({ value: c, label: 'kolor ' + (i + 1) })), value: (uczen || me).kolor || CQ.PALETTE[0] },
+        { name: 'nakrycie', label: 'Nakrycie', type: 'select', options: ['', '🎓', '👑', '🚀', '🎧', '🦄', '⚡'].map((h) => ({ value: h, label: h || 'brak' })), value: (uczen || me).nakrycie || '🎓' },
+      ], { okLabel: 'Zapisz' });
+      if (!v) return;
+      if (uczen) await CQ.store.update('uczniowie', uczen.id, { kolor: v.kolor, nakrycie: v.nakrycie });
+      CQ.Student.save({ kolor: v.kolor, nakrycie: v.nakrycie });
+      me = CQ.Student.current();
+      ui.toast('Awatar odświeżony.', 'ok');
+      render();
+    });
+  }
 
-    function goToStep(stepNum) {
-      document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
-      document.getElementById(`step${stepNum}`).classList.add('active');
-
-      const subtitle = document.getElementById('subtitleText');
-      if (stepNum === 2) subtitle.innerText = "Wskaż kim jesteś z listy klasy 8B";
-      if (stepNum === 3) subtitle.innerText = "Dostosuj swój wygląd przed wejściem na planszę";
-    }
-
-    function selectStudent(element, name) {
-      document.querySelectorAll('.student-item').forEach(item => item.classList.remove('selected'));
-      element.classList.add('selected');
-      selectedStudent = name;
-      
-      const btn = document.getElementById('confirmStudentBtn');
-      btn.style.opacity = '1';
-      btn.style.pointerEvents = 'auto';
-      document.getElementById('selectedNameLabel').innerText = name;
-    }
-
-    function changeColor(color) {
-      document.getElementById('charBody').style.background = color;
-    }
-
-    function changeHat(hat) {
-      document.getElementById('charHat').innerText = hat;
-    }
-
-    function joinLobby() {
-      alert(`Wchodzisz do gry jako ${selectedStudent}! Przekierowanie do lobby 2D...`);
-    }
-  </script>
-
+  ui.live(render);
+  render();
+</script>
 </body>
 </html>
