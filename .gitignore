@@ -1,0 +1,12 @@
+# Stan lokalny serwera synchronizacji (tryb LAN)
+.data/
+
+# Niepotrzebne w repo
+node_modules/
+*.log
+.DS_Store
+Thumbs.db
+
+# tymczasowe pliki narzędzi kontrolnych
+.tmp-*
+.kod-debug.js

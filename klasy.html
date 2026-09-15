@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klasy i uczniowie — ClassQuest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <style>
+    .class-card { cursor: pointer; transition: transform .18s var(--ease-bounce), box-shadow .2s; }
+    .class-card:hover { transform: translateY(-3px); }
+    .class-card.on { box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light); }
+    .class-card .name { font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 9px; }
+    .class-card .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .xp-ledger .row { display: flex; gap: 10px; align-items: center; padding: 8px 12px; border-radius: 12px; font-size: .85rem; box-shadow: 4px 4px 8px var(--shadow-dark-soft), -4px -4px 8px var(--shadow-light); }
+    tr.student-row td:first-child { border-left: 4px solid var(--blue); }
+    .lvl-bar { width: 86px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="page-head row-between wrap">
+    <div><h1>Klasy i uczniowie</h1><p>Lista dziennikowa, poziomy XP i księga nagród. Stąd uczniowie biorą się na listach w grach.</p></div>
+    <div class="row-8 wrap">
+      <span id="mode-slot"></span>
+      <button class="neu-btn sm" id="new-class">➕ Nowa klasa</button>
+      <button class="neu-btn sm primary" id="bulk">📋 Wklej listę uczniów</button>
+    </div>
+  </div>
+
+  <div class="split-sidebar">
+    <div class="stack stack-12" id="class-list"></div>
+
+    <div class="stack stack-24">
+      <div class="neu-card" id="class-panel"></div>
+      <div class="neu-card" id="student-detail"></div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/store.js"></script>
+<script src="assets/js/ui.js"></script>
+<script type="module">
+  const { ui } = CQ;
+  const $ = (s) => document.querySelector(s);
+  const me = await ui.bootTeacher({ active: 'klasy' });
+  if (!me) throw new Error('brak dostępu');
+  await CQ.store.ready();
+  $('#mode-slot').innerHTML = ui.modeChip();
+
+  let selected = new URLSearchParams(location.search).get('klasa') || localStorage.getItem('cq_klasa') || null;
+  let openStudent = null;
+
+  function klasy() { return CQ.Klasy.withStats(me.id); }
+
+  function pick() {
+    const all = klasy();
+    if (!all.some((k) => k.id === selected)) selected = all[0] ? all[0].id : null;
+    if (selected) localStorage.setItem('cq_klasa', selected);
+    return all.find((k) => k.id === selected) || null;
+  }
+
+  /* ---- lista klas ---- */
+  function renderClasses() {
+    const all = klasy();
+    $('#class-list').innerHTML = all.length ? all.map((k) => `
+      <div class="neu-card pad-sm class-card ${k.id === selected ? 'on' : ''}" data-klasa="${k.id}">
+        <div class="name"><span class="dot" style="background:${k.kolor}"></span>${ui.esc(k.nazwa)}
+          <span class="grow"></span><span class="badge">${k.uczniowie.length}</span></div>
+        <div class="tiny muted mt-8">${ui.esc(k.opis || 'bez opisu')}</div>
+        <div class="row-8 mt-8"><span class="badge blue" title="Kod klasy do wpisywania przez uczniów">kod ${ui.esc(k.kod)}</span>
+          <span class="badge">${k.zestawy.length} zest.</span></div>
+      </div>`).join('')
+      : ui.empty('🏫', 'Nie masz jeszcze żadnej klasy', 'Załóż klasę — potem wklej do niej listę uczniów.',
+        '<button class="neu-btn primary sm" data-add-class>Dodaj pierwszą klasę</button>');
+  }
+
+  /* ---- panel wybranej klasy ---- */
+  function renderPanel() {
+    const k = pick();
+    if (!k) { $('#class-panel').innerHTML = ui.empty('👈', 'Wybierz klasę', 'Albo załóż nową.'); $('#student-detail').innerHTML = ''; return; }
+    const rows = k.uczniowie;
+    const sumaXp = rows.reduce((a, b) => a + (b.xp || 0), 0);
+    const srednia = rows.length ? Math.round(sumaXp / rows.length) : 0;
+    const zGrama = new Set(CQ.store.where('sesje', (s) => s.klasa_id === k.id).map((s) => s.id));
+    const grali = new Set(CQ.store.table('gracze').filter((g) => zGrama.has(g.sesja_id)).map((g) => g.uczen_id));
+
+    $('#class-panel').innerHTML = `
+      <div class="section-title">
+        <span style="width:14px;height:14px;border-radius:5px;background:${k.kolor};display:inline-block"></span>
+        ${ui.esc(k.nazwa)} <span class="spacer"></span>
+        <button class="neu-btn sm ghost" data-edit-class title="Edytuj klasę">✏️</button>
+        <button class="neu-btn sm danger" data-del-class title="Usuń klasę">🗑️</button>
+      </div>
+      <div class="grid-4 mb-16">
+        <div class="stat"><div class="label">Uczniów</div><div class="value">${rows.length}</div><div class="hint">${grali.size} grało choć raz</div></div>
+        <div class="stat"><div class="label">Suma XP</div><div class="value">${ui.fmtPts(sumaXp)}</div><div class="hint">średnia ${ui.fmtPts(srednia)}</div></div>
+        <div class="stat"><div class="label">Gry klasy</div><div class="value">${zGrama.size}</div><div class="hint">${CQ.store.table('zestawy').filter((z) => z.klasa_id === k.id).length} zestawów</div></div>
+        <div class="stat"><div class="label">Kod klasy</div><div class="value mono">${ui.esc(k.kod)}</div><div class="hint">do list i zgłoszeń</div></div>
+      </div>
+      <div class="row-8 wrap mb-16">
+        <button class="neu-btn sm primary" data-add-student>➕ Uczeń</button>
+        <button class="neu-btn sm" data-bulk>📋 Wklej listę</button>
+        <button class="neu-btn sm" data-csv>⬇️ CSV listy</button>
+        <button class="neu-btn sm" data-csv-xp>📊 CSV z XP</button>
+        <span class="grow"></span>
+        <a class="neu-btn sm" href="zestawy.html?klasa=${k.id}">Zestawy tej klasy</a>
+      </div>
+      ${rows.length ? `<div class="table-wrap"><table class="data">
+        <thead><tr><th>Nr</th><th>Uczeń</th><th>Poziom</th><th>XP</th><th>Dokładność</th><th></th></tr></thead>
+        <tbody>${rows.map((u) => {
+          const p = CQ.poziomZxp(u.xp);
+          const odp = CQ.store.where('odpowiedzi', (o) => { const g = CQ.store.byId('gracze', o.gracz_id); return g && g.uczen_id === u.id; });
+          const acc = odp.length ? Math.round(odp.filter((o) => o.poprawna).length / odp.length * 100) : null;
+          return `<tr class="student-row" style="border-left:4px solid ${u.kolor}" data-student="${u.id}">
+            <td class="num muted">${u.numer || '—'}</td>
+            <td><b>${ui.esc(u.nazwa)}</b><div class="tiny muted">${ui.fmtPts(odp.length)} odpowiedzi w grach</div></td>
+            <td>${ui.esc(p.nazwa)}<div class="progress lvl-bar mt-8"><i style="width:${Math.round(p.postep * 100)}%"></i></div></td>
+            <td class="num"><b>${ui.fmtPts(u.xp || 0)}</b></td>
+            <td class="num">${acc == null ? '<span class="muted">—</span>' : acc + '%'}</td>
+            <td>
+              <button class="neu-btn square sm" data-xp="${u.id}" title="Przyznaj XP">✨</button>
+              <button class="neu-btn square sm" data-edit-student="${u.id}" title="Edytuj">✏️</button>
+              <button class="neu-btn square sm danger" data-del-student="${u.id}" title="Usuń">🗑️</button>
+            </td></tr>`;
+        }).join('')}</tbody></table></div>`
+      : ui.empty('🎈', 'W tej klasie jeszcze nikogo nie ma', 'Wklej listę z dziennika — jedną osobę w linii „1. Imię Nazwisko”.')}
+      <p class="tiny muted mt-16">Kliknij wiersz, aby zobaczyć księgę XP ucznia.</p>`;
+  }
+
+  function renderStudent() {
+    const box = $('#student-detail');
+    if (!openStudent) { box.innerHTML = ''; return; }
+    const u = CQ.store.byId('uczniowie', openStudent);
+    if (!u) { openStudent = null; box.innerHTML = ''; return; }
+    const p = CQ.poziomZxp(u.xp);
+    const wpisy = CQ.Uczniowie.historia(u.id).slice(0, 14);
+    const zgloszenia = CQ.Zgloszenia.forStudent(u.id).slice(0, 6);
+    box.innerHTML = `
+      <div class="section-title">👤 ${ui.esc(u.nazwa)} <span class="spacer"></span>
+        <button class="neu-btn sm ghost" data-close-student>Zamknij</button></div>
+      <div class="row-16 wrap">
+        ${ui.avatar(u.nazwa, u.kolor, u.nakrycie)}
+        <div class="grow">
+          <div class="row-8 wrap"><b>${ui.esc(u.nazwa)}</b> ${ui.levelBadge(u.xp)}</div>
+          <div class="progress mt-8"><i style="width:${Math.round(p.postep * 100)}%"></i></div>
+          <div class="tiny muted mt-8">Do poziomu ${p.poziom + 1} brakuje ${p.doKolejnego} XP · nr ${u.numer || '—'} · kod klasy ${ui.esc((CQ.store.byId('klasy', u.klasa_id) || {}).kod || '')}</div>
+        </div>
+      </div>
+      <div class="grid-2 mt-16">
+        <div>
+          <b class="small">📒 Księga XP</b>
+          <div class="xp-ledger stack stack-8 mt-8">${wpisy.length ? wpisy.map((w) => `
+            <div class="row"><b style="color:${w.kwota >= 0 ? 'var(--green)' : 'var(--red)'}">${w.kwota > 0 ? '+' : ''}${w.kwota}</b>
+            <span class="grow small semi">${ui.esc(w.powod)}</span><span class="tiny muted">${ui.fmtDate(w.utworzono)}</span></div>`).join('')
+            : '<span class="tiny muted">Jeszcze nic nie zapisano.</span>'}</div>
+        </div>
+        <div>
+          <b class="small">📥 Zgłoszenia ucznia</b>
+          <div class="stack stack-8 mt-8">${zgloszenia.length ? zgloszenia.map((z) => `
+            <div class="row"><span class="badge ${z.status === 'oczekuje' ? 'amber' : z.status === 'zatwierdzone' ? 'green' : 'red'}">${z.status}</span>
+            <span class="grow small semi">${ui.esc(z.tytul)}</span><span class="tiny muted">${z.xp} XP</span></div>`).join('')
+            : '<span class="tiny muted">Uczeń nie wysyłał zgłoszeń.</span>'}</div>
+          <div class="row-8 mt-16"><button class="neu-btn sm primary" data-xp="${u.id}">Przyznaj XP</button>
+            <button class="neu-btn sm" data-look="${u.id}">Gry ucznia</button></div>
+        </div>
+      </div>`;
+  }
+
+  /* ---- akcje ---- */
+  async function nowaKlasa() {
+    const v = await ui.formModal('Nowa klasa', [
+      { name: 'nazwa', label: 'Nazwa', placeholder: 'np. 5A', required: true },
+      { name: 'opis', label: 'Opis (opcjonalnie)', placeholder: 'np. wychowawstwo, sala 21' },
+      { name: 'kolor', label: 'Kolor w interfejsie', type: 'select', options: CQ.PALETTE.map((c, i) => ({ value: c, label: ['niebieski', 'zielony', 'bursztyn', 'różowy', 'fiolet', 'cyjan', 'czerwony', 'limonka'][i] })), value: CQ.PALETTE[0] },
+    ], { okLabel: 'Utwórz klasę' });
+    if (!v) return;
+    try {
+      const k = await CQ.Klasy.create(me.id, v);
+      selected = k.id;
+      ui.toast('Klasa założona. Teraz wklej listę uczniów.', 'ok');
+      render();
+      listaUczniowie(k.id);
+    } catch (e) { ui.toast(e.message, 'err'); }
+  }
+
+  function listaUczniowie(klasaId) {
+    const k = ui.wiersz('klasy', klasaId, 'klasa');
+    if (!k) { render(); return; }
+    openModalStudent({
+      title: `Lista uczniów — ${k.nazwa}`,
+      intro: 'Wklej listę z dziennika: jedną osobę w linii. Numer dziennika może być na początku („1. Jan Kowalski” albo „Kowalski Jan, 1”).',
+      value: '',
+      okLabel: 'Dodaj do klasy',
+      onSubmit: async ({ text }) => {
+        const dodani = await CQ.Uczniowie.addBulk(klasaId, text);
+        ui.toast(`Dodano ${dodani.length} uczniów.`, 'ok');
+      },
+    });
+  }
+
+  function openModalStudent({ title, intro, value = '', okLabel, onSubmit, fields }) {
+    const form = ui.el('form', { class: 'stack stack-12' });
+    const inputs = {};
+    for (const f of (fields || [{ name: 'text', label: 'Lista', type: 'textarea', rows: 8, placeholder: '1. Jan Kowalski\n2. Anna Nowak' }])) {
+      const wrap = ui.el('div', { class: 'field' });
+      wrap.appendChild(ui.el('label', { class: 'neu-label', text: f.label }));
+      const inp = f.type === 'textarea'
+        ? ui.el('textarea', { class: 'neu-textarea', rows: f.rows || 4, placeholder: f.placeholder || '' })
+        : ui.el('input', { class: 'neu-input', type: f.type || 'text', placeholder: f.placeholder || '', required: f.required, min: f.min, max: f.max, step: f.step });
+      inp.value = (f.name === 'text' ? value : f.value) || '';
+      wrap.appendChild(inp);
+      if (f.hint) wrap.appendChild(ui.el('div', { class: 'tiny muted mt-8', text: f.hint }));
+      form.appendChild(wrap);
+      inputs[f.name] = inp;
+    }
+    const body = ui.el('div', {}, [ui.el('p', { class: 'muted small mb-16', text: intro }), form]);
+    ui.openModal({
+      title,
+      body,
+      actions: [
+        { label: 'Anuluj', class: 'ghost', onClick: ({ close }) => close() },
+        { label: okLabel, class: 'primary', onClick: async ({ close }) => {
+          if (!form.reportValidity()) return;
+          try {
+            await onSubmit(inputs.text ? { text: inputs.text.value } : Object.fromEntries(Object.entries(inputs).map(([k, v]) => [k, v.value])));
+            close(); render();
+          } catch (e) { ui.toast(e.message, 'err'); }
+        } },
+      ],
+    });
+  }
+
+  async function editKlasa() {
+    const k = pick();
+    const v = await ui.formModal('Edytuj klasę', [
+      { name: 'nazwa', label: 'Nazwa', value: k.nazwa, required: true },
+      { name: 'opis', label: 'Opis', value: k.opis },
+      { name: 'kod', label: 'Kod klasy (4 cyfry)', value: k.kod, required: true },
+    ], { okLabel: 'Zapisz' });
+    if (!v) return;
+    await CQ.Klasy.update(k.id, v);
+    ui.toast('Zapisano klasę.', 'ok');
+    render();
+  }
+
+  async function delKlasa() {
+    const k = pick();
+    const yes = await ui.confirmBox('Usunąć klasę?',
+      `<b>${ui.esc(k.nazwa)}</b> zniknie razem z ${k.uczniowie.length} uczniami, ${k.zestawy.length} zestawami i historią gier. Tej operacji nie da się cofnąć.`,
+      { ok: 'Usuń wszystko', danger: true });
+    if (!yes) return;
+    await CQ.Klasy.remove(k.id);
+    selected = null;
+    ui.toast('Klasa usunięta.', 'warn');
+    render();
+  }
+
+  async function przyznajXp(uczenId) {
+    const u = ui.wiersz('uczniowie', uczenId, 'uczeń');
+    if (!u) { render(); return; }
+    const v = await ui.formModal(`XP dla: ${u.nazwa}`, [
+      { name: 'kwota', label: 'Ile XP', type: 'number', value: 20, min: -300, required: true },
+      { name: 'powod', label: 'Za co', required: true, placeholder: 'np. pomoc przy doświadczeniu' },
+    ], { okLabel: 'Przyznaj' });
+    if (!v) return;
+    try { await CQ.Uczniowie.awardXp(uczenId, v.kwota, v.powod, 'manualne'); ui.toast(`${v.kwota > 0 ? '+' : ''}${v.kwota} XP`, 'ok'); render(); }
+    catch (e) { ui.toast(e.message, 'err'); }
+  }
+
+  /* ---- delegacja zdarzeń ---- */
+  document.addEventListener('click', async (e) => {
+    const t = e.target;
+    const klasaCard = t.closest('[data-klasa]');
+    if (klasaCard && !t.closest('button')) { selected = klasaCard.dataset.klasa; openStudent = null; render(); return; }
+    if (t.closest('[data-add-class], #new-class')) return nowaKlasa();
+    if (t.closest('[data-edit-class]')) return editKlasa();
+    if (t.closest('[data-del-class]')) return delKlasa();
+    if (t.closest('[data-bulk], #bulk')) { const k = pick(); if (!k) return nowaKlasa(); return listaUczniowie(k.id); }
+    if (t.closest('[data-add-student]')) {
+      const k = pick();
+      if (!k) return;
+      return openModalStudent({
+        title: 'Dodaj ucznia', okLabel: 'Dodaj', intro: 'Ręcznie, jedno nazwisko.',
+        fields: [
+          { name: 'nazwa', label: 'Imię i nazwisko', required: true, placeholder: 'np. Jan Kowalski' },
+          { name: 'numer', label: 'Numer w dzienniku', type: 'number', min: 1, value: k.uczniowie.length + 1 },
+        ],
+        onSubmit: async (v) => { await CQ.Uczniowie.add(k.id, v.nazwa, v.numer); ui.toast('Uczeń dodany.', 'ok'); },
+      });
+    }
+    const xpBtn = t.closest('[data-xp]');
+    if (xpBtn) return przyznajXp(xpBtn.dataset.xp);
+    const edit = t.closest('[data-edit-student]');
+    if (edit) {
+      const u = ui.wiersz('uczniowie', edit.dataset.editStudent, 'uczeń');
+      if (!u) { render(); return; }
+      const v = await ui.formModal('Edytuj ucznia', [
+        { name: 'nazwa', label: 'Imię i nazwisko', value: u.nazwa, required: true },
+        { name: 'numer', label: 'Numer w dzienniku', type: 'number', value: u.numer, min: 1 },
+        { name: 'kolor', label: 'Kolor awatara', type: 'select', options: CQ.PALETTE.map((c, i) => ({ value: c, label: 'kolor ' + (i + 1) })), value: u.kolor },
+        { name: 'nakrycie', label: 'Nakrycie głowy', type: 'select', options: ['', '🎓', '👑', '🚀', '🎧', '🦄', '⚡'].map((h) => ({ value: h, label: h || 'brak' })), value: u.nakrycie },
+      ], { okLabel: 'Zapisz' });
+      if (v) { await CQ.store.update('uczniowie', u.id, { nazwa: v.nazwa, numer: Number(v.numer) || u.numer, kolor: v.kolor, nakrycie: v.nakrycie }); ui.toast('Zapisano.', 'ok'); render(); }
+      return;
+    }
+    const del = t.closest('[data-del-student]');
+    if (del) {
+      const u = ui.wiersz('uczniowie', del.dataset.delStudent, 'uczeń');
+      if (!u) { render(); return; }
+      const yes = await ui.confirmBox('Usunąć ucznia?', `<b>${ui.esc(u.nazwa)}</b> straci XP i historię zgłoszeń.`, { ok: 'Usuń', danger: true });
+      if (yes) { await CQ.Uczniowie.remove(u.id); ui.toast('Usunięto.', 'warn'); render(); }
+      return;
+    }
+    const look = t.closest('[data-look]');
+    if (look) { location.href = `wyniki.html?uczen=${look.dataset.look}`; return; }
+    if (t.closest('[data-close-student]')) { openStudent = null; renderStudent(); return; }
+    const row = t.closest('tr[data-student]');
+    if (row && !t.closest('button')) { openStudent = row.dataset.student; renderStudent(); return; }
+
+    if (t.closest('[data-csv]')) {
+      const k = pick();
+      ui.download(`uczniowie-${k.nazwa}.csv`, ['numer;nazwa;xp;poziom', ...k.uczniowie.map((u) => [u.numer || '', `"${u.nazwa}"`, u.xp || 0, CQ.poziomZxp(u.xp).poziom].join(';'))].join('\n'), 'text/csv');
+      return;
+    }
+    if (t.closest('[data-csv-xp]')) {
+      const k = pick();
+      const rows = CQ.Raporty.rankingKlasy(k.id);
+      ui.download(`raport-${k.nazwa}.csv`, ['pozycja;uczen;xp;poziom;gry;poprawne;odpowiedzi;dokladnosc',
+        ...rows.map((r, i) => [i + 1, `"${r.nazwa}"`, r.xp, r.poziom, r.gry, r.poprawne, r.odpowiedzi, r.dokladnosc + '%'].join(';'))].join('\n'), 'text/csv');
+      return;
+    }
+  });
+
+  function render() { renderClasses(); renderPanel(); renderStudent(); }
+  ui.live(render);
+  render();
+</script>
+</body>
+</html>
